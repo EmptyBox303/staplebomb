@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Staple Bomb",
+  "version": "1.0",
+  "description": "Track tab times with staples. Blow them up with bombs.",
+  "permissions": ["activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
