@@ -1,6 +1,7 @@
 let currentURL = window.location.href;
 let l = currentURL.length;
 let i = 0;
+alert("switch tab");
 
 //O(n)
 for(i = 0; i < l-2; i++){
