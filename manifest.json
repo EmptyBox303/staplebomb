@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Staple Bomb",
+  "name": "Pin Bomb",
   "version": "1.0",
-  "description": "Track tab times with staples. Blow them up with bombs.",
+  "description": "Track tab times with pins. Blow them up with bombs.",
   "permissions": ["activeTab"],
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icon.png"
+    "default_icon": "pinbomb48.png"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
