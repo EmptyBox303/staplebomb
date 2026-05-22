@@ -3,7 +3,7 @@
   "name": "Pin Bomb",
   "version": "1.0",
   "description": "Track tab times with pins. Blow them up with bombs.",
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab","tabs","scripting"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": "pinbomb48.png"
