@@ -1,4 +1,4 @@
-export function ParseDomain(url){
+function ParseDomain(url){
     let i = 0;
     let l = url.length;
     
@@ -19,6 +19,5 @@ export function ParseDomain(url){
     //domain_end is either the end of the URL or at index of first / or : after scheme
     let domain_end = i;
     let domain = currentURL.substring(domain_start,domain_end);
-    alert(domain);
     return domain;
 }

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Pin Bomb",
   "version": "1.0",
-  "description": "Track tab times with pins. Blow them up with bombs.",
+  "description": "Track tab usage with pins. Blow them up with bombs.",
   "permissions": ["activeTab","tabs","scripting"],
   "action": {
     "default_popup": "popup.html",
@@ -11,10 +11,20 @@
   "background": {
     "service_worker": "src/background.js"
   },
+  "host_permissions": [
+    "*://*/*"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content.js"]
+      "js": [
+        "./src/utils.js",
+        "./src/content.js"
+      ]
+      
     }
   ]
 }
+
+
+
