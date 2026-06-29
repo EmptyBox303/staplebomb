@@ -9,7 +9,7 @@ function ParseDomain(url){
         }
     }
     if(i === l-2){
-        throw new Error("url has no scheme\n");
+        throw new Error("url has no scheme?\n");
     }
     let domain_start = i+3;
     for(i = domain_start; i < l; i++){
