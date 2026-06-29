@@ -1,40 +1,51 @@
+async function send(message){
+    chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+            console.error("Message failed:", chrome.runtime.lastError);
+            return;
+        }
+    });
+}
+
+
+
 let currentURL = window.location.href;
+console.log("try again");
 const domain = ParseDomain(currentURL);
 const create_message = {
     type: "FOCUS",
     time: Date.now(),
     domain: domain
 }
-chrome.runtime.sendMessage(create_message, (response) => {
-    return;
-}).catch(error => {
+send(create_message);/* .catch((error) => {
     console.error(`Error: ${error}`);
-});
+}); */
 
-window.addEventListener('blur', () => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "injectionCheck") {
+    sendResponse({ isInjected : true });
+  }
+});
+window.addEventListener('blur', async () => {
     const message = {
         type: "BLUR",
         time: Date.now(),
         domain: domain
     }
-    chrome.runtime.sendMessage(message, (response) => {
-        return;
-    }).catch(error => {
+    send(message);/* .catch((error) => {
         console.error(`Error: ${error}`);
-    });
+    }); */
 });
 
-window.addEventListener('focus', () => {
+window.addEventListener('focus', async () => {
     const message = {
         type: "FOCUS",
         time: Date.now(),
         domain: domain
     }
-    chrome.runtime.sendMessage(message, (response) => {
-        return;
-    }).catch(error => {
+    send(message);/* .catch((error) => {
         console.error(`Error: ${error}`);
-    });
+    }); */
 });
 
 
