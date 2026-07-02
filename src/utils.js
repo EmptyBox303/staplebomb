@@ -41,3 +41,78 @@ function GetFaviconUrl() {
         return null;
     }
 }
+
+function GetStopwatchTime(startTime){
+    const timeDiff = (Date.now() - startTime);
+    const seconds = timeDiff % 60000;
+    var second_str = String(seconds);
+    if (second_str.length < 5){
+        second_str = "0".repeat(5-second_str.length) + second_str;
+    }
+    second_str = second_str.slice(0,2) + "." + second_str.slice(2);
+
+    const minutes = Math.floor(timeDiff/60000) % 60;
+    var minute_str = String(minutes);
+    if (minute_str.length < 2){
+        minute_str = "0".repeat(2-minute_str.length) + minute_str;
+    }
+
+    const hours = Math.floor(timeDiff/3600000);
+    var hour_str = String(hours);
+    if (hour_str.length < 2){
+        hour_str = "0".repeat(2-hour_str.length) + hour_str;
+    }
+
+    return `${hour_str}:${minute_str}:${second_str}`;
+}
+
+
+function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  const drag = document.getElementsByClassName(elmnt.className + "Drag");
+  if (drag.length == 0) return;
+
+  drag[0].onmousedown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    var top_offset = elmnt.offsetTop - pos2;
+    if (top_offset < 0) 
+        top_offset = 0;
+    if (top_offset > window.innerHeight - elmnt.offsetHeight) 
+        top_offset = window.innerHeight - elmnt.offsetHeight;
+    var left_offset = elmnt.offsetLeft - pos1;
+    if (left_offset < 0) 
+        left_offset = 0;
+    if (left_offset > window.innerWidth - elmnt.offsetWidth) 
+        left_offset = window.innerWidth - elmnt.offsetWidth;
+
+    elmnt.style.top = top_offset + "px";
+    elmnt.style.left = left_offset + "px";
+
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}

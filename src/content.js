@@ -7,11 +7,63 @@ async function send(message,port){
     }
 }
 
+async function AsyncLoop(action_fn,condition_fn){
+    while(condition_fn()){
+        action_fn();
+        await new Promise((resolve) => setTimeout(resolve,0));
+    }
+}
 
+async function InitWindowStopwatch(){
+    const logo_url = GetFaviconUrl();
+    const currentURL = ParseDomain(window.location.href);
+    const currTime = Date.now();
 
+    var div = document.createElement("div");
+    div.className = "expandedStopwatch";
+    document.body.appendChild(div);
+    
+    var timediv = document.createElement("div");
+    timediv.style = "padding: 15pt";
+    div.appendChild(timediv);
+    //
+    
+    
+    var dragdiv = document.createElement("div");
+    dragdiv.className = "expandedStopwatchDrag";
+    dragdiv.innerText = "Drag";
+    div.appendChild(dragdiv);
+    dragElement(div);
+    const topline = `
+         <img src = ${logo_url} alt = ${"icon for " + currentURL} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
+        ${currentURL} <p style = "border: 0; margin: 0; padding: 0">
+    `;
 
+    AsyncLoop(() => {
+        timediv.innerHTML = topline + GetStopwatchTime(currTime) + "</p>";
+    }, () => true);
 
-//const vis = /* (document.visibilityState === "visible"); */ document.hasFocus();
+    
+    
+
+    /* const div = document.createElement("div");
+  div.innerHTML = `
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #222;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      z-index: 999999;
+      font-family: sans-serif;
+    ">
+      🚀 Injected HTML Content!
+    </div>
+  `;
+  document.body.appendChild(div); */
+}
 
 function MakePort(){
     var currentURL = window.location.href;
@@ -83,51 +135,23 @@ function MakePort(){
     });
 }
 
-function InitWindowStopwatch(){
-    const logo_url = GetFaviconUrl();
-    const currentURL = ParseDomain(window.location.href);
-    var div = document.createElement("div");
-    div.className = "expandedStopwatch";
-    //
-    div.innerHTML = 
-    `
-        <img src = ${logo_url} alt = ${"icon for " + currentURL} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
-        ${currentURL}
-    `;
+function MakeInjectionMarker(){
+    const div = document.createElement("div");
+    div.className = "staplebombInjectionMarker";
     document.body.appendChild(div);
-
-    /* const div = document.createElement("div");
-  div.innerHTML = `
-    <div style="
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #222;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      z-index: 999999;
-      font-family: sans-serif;
-    ">
-      🚀 Injected HTML Content!
-    </div>
-  `;
-  document.body.appendChild(div); */
 }
 
-InitWindowStopwatch();
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Content script received:", message);
+function InjectionMarkerExist(){
+    const mark = document.getElementsByClassName('staplebombInjectionMarker');
+    return (mark.length > 0);
+}
 
-  // Optional: send a response back
-  sendResponse({ isInjected: true });
+if (!InjectionMarkerExist()){
+    MakeInjectionMarker();
+    InitWindowStopwatch();
+    MakePort();
+}
 
-  // Return true if you want to send an async response
-  return true;
-});
-
-
-MakePort();
 
 
 
