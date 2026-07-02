@@ -1,10 +1,10 @@
-async function send(message,port){
+async function send(message,port, url){
     try{
         port.postMessage(message);
     }
     catch(error){
-        console.log(`message failed to send at ${port.name}: ${error}`);
-        MakePort();
+        console.log(`message failed to send at ${url}: ${error}`);
+        //MakePort();
     }
 }
 
@@ -82,12 +82,26 @@ function MakePort(){
     console.log("try again");
     const domain = ParseDomain(currentURL);
     var port;
-    try{
-        port = chrome.runtime.connect({name: currentURL});
+    let port_success = false;
+    let attempts = 0;
+    while(!port_success && attempts < 10){
+        try{
+            port = chrome.runtime.connect({name: currentURL});
+            port_success = true;
+        }
+        catch(err){
+            console.warn(`Connection failed with ${currentURL}: ${err}`);
+        }
+        setTimeout(()=>{},1000);
+        attempts ++;
     }
-    catch(err){
-        console.warn(`Connection failed with ${currentURL}: ${err}`);
+
+    if (attempts == 10 && !port_success){
+        console.warn(`Connection failed with ${currentURL} for maximum attempts; stopping now`);
+        return;
     }
+
+    
     var beforeclose = true;
     var start_message = {
         name: domain,
@@ -100,10 +114,16 @@ function MakePort(){
 
 
 
-    send(start_message,port);
+    send(start_message,port,currentURL);
 
-    port.onDisconnect.addListener(() => {
-        setTimeout(MakePort, 500); // retry after delay
+    port.onDisconnect.addListener((p) => {
+        if (p.error){
+            console.error(p);
+        }
+        if (beforeclose){
+            setTimeout(MakePort, 500);
+        }
+         // retry after delay
     });
 
     window.addEventListener('blur', async () => {
@@ -113,7 +133,7 @@ function MakePort(){
             action: "HIDE",
             time: Date.now()
         }
-        send(message,port);
+        send(message,port,currentURL);
     });
 
     window.addEventListener('focus', async () => {
@@ -123,7 +143,7 @@ function MakePort(){
             action: "SHOW",
             time: Date.now()
         }
-        send(message,port);
+        send(message,port,currentURL);
     });
 
     window.addEventListener("beforeunload", () => {
@@ -133,15 +153,11 @@ function MakePort(){
             action: "CLOSE",
             time: Date.now()
         }
-        send(message,port);
+        send(message,port,currentURL);
         beforeclose = false;
 
         if (port && !beforeclose){
-            try{
-                port.disconnect();
-            }catch(err){
-                console.warn("Disconnect failed: ", err);
-            }
+            return;
         }
         
     });
@@ -161,8 +177,10 @@ function InjectionMarkerExist(){
 if (!InjectionMarkerExist()){
     MakeInjectionMarker();
     InitWindowStopwatch();
-    MakePort();
+    
 }
+
+MakePort();
 
 
 
