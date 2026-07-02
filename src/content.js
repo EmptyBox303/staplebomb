@@ -83,6 +83,39 @@ function MakePort(){
     });
 }
 
+function InitWindowStopwatch(){
+    const logo_url = GetFaviconUrl();
+    const currentURL = ParseDomain(window.location.href);
+    var div = document.createElement("div");
+    div.className = "expandedStopwatch";
+    //<img src = ${logo_url} alt = ${"icon for " + currentURL}>
+    div.innerHTML = 
+    `
+        Viewport: ${window.innerWidth} x ${window.innerHeight} <br>
+        ${currentURL}
+    `;
+    document.body.appendChild(div);
+
+    /* const div = document.createElement("div");
+  div.innerHTML = `
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #222;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      z-index: 999999;
+      font-family: sans-serif;
+    ">
+      🚀 Injected HTML Content!
+    </div>
+  `;
+  document.body.appendChild(div); */
+}
+
+InitWindowStopwatch();
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Content script received:", message);
 

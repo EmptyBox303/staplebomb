@@ -21,3 +21,23 @@ function ParseDomain(url){
     let domain = url.substring(domain_start,domain_end);
     return domain;
 }
+
+//ts is straightup copied output
+function GetFaviconUrl() {
+    try {
+        // Query all possible favicon link rel values
+        const faviconEl = document.querySelector(
+            'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
+        );
+
+        if (faviconEl && faviconEl.href) {
+            return faviconEl.href;
+        }
+
+        // Fallback: assume default location
+        return `${location.origin}/favicon.ico`;
+    } catch (err) {
+        console.error("Error getting favicon:", err);
+        return null;
+    }
+}
