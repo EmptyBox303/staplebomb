@@ -8,4 +8,4 @@ Every minute mark a package of use times is sent to IndexedDB for records keepin
 - Total amount of time spent in the last 6 hours
 - Total amount of time spent in the last 24 hours
 
-In the future, once 
+Based on UNIX time factor 1000 * 3600 * 24, 

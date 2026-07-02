@@ -69,7 +69,7 @@ function GetStopwatchTime(startTime){
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  const drag = document.getElementsByClassName(elmnt.className + "Drag");
+  const drag = document.getElementsByClassName("stopwatchDrag");
   if (drag.length == 0) return;
 
   drag[0].onmousedown = dragMouseDown;
@@ -99,15 +99,17 @@ function dragElement(elmnt) {
         top_offset = 0;
     if (top_offset > window.innerHeight - elmnt.offsetHeight) 
         top_offset = window.innerHeight - elmnt.offsetHeight;
-    var left_offset = elmnt.offsetLeft - pos1;
-    if (left_offset < 0) 
-        left_offset = 0;
-    if (left_offset > window.innerWidth - elmnt.offsetWidth) 
-        left_offset = window.innerWidth - elmnt.offsetWidth;
+    //var left_offset = elmnt.offsetLeft - pos1;
 
+    var right_offset = window.innerWidth - (elmnt.offsetLeft - pos1) - elmnt.offsetWidth;
+    if (right_offset < 0) 
+        right_offset = 0; 
+    if (right_offset > window.innerWidth - elmnt.offsetWidth) 
+        right_offset = window.innerWidth - elmnt.offsetWidth;
+    
+    //console.log(right_offset);
     elmnt.style.top = top_offset + "px";
-    elmnt.style.left = left_offset + "px";
-
+    elmnt.style.right = right_offset + "px";
   }
 
   function closeDragElement() {

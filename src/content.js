@@ -24,45 +24,55 @@ async function InitWindowStopwatch(){
     document.body.appendChild(div);
     
     var timediv = document.createElement("div");
-    timediv.style = "padding: 15pt";
+    timediv.style = "margin: 15pt";
     div.appendChild(timediv);
     //
     
     
     var dragdiv = document.createElement("div");
-    dragdiv.className = "expandedStopwatchDrag";
+    dragdiv.className = "stopwatchDrag";
     dragdiv.innerText = "Drag";
     div.appendChild(dragdiv);
     dragElement(div);
+
+    var buttondiv = document.createElement("div");
+
+    var innerbutton = document.createElement("button");
+    innerbutton.dataset.collapse = "true";
+    innerbutton.innerText = "-";
+    buttondiv.appendChild(innerbutton);
+
+    buttondiv.className = "collapseClick";
+    buttondiv.onclick = () =>{
+        console.log("click");
+        if (innerbutton.dataset.collapse === "true"){
+            innerbutton.dataset.collapse = "false";
+            div.className = "collapsedStopwatch";
+            timediv.style = "margin: 8pt 15pt 15pt 15pt";
+            innerbutton.innerText = "+";
+
+        }
+        else if (innerbutton.dataset.collapse === "false"){
+            innerbutton.dataset.collapse = "true";
+            div.className = "expandedStopwatch";
+            timediv.style = "margin: 15pt";
+            innerbutton.innerText = "-";
+        }
+        else{
+            console.error("button error: invalid 'collapse' data");
+        }
+    };
+    div.appendChild(buttondiv);
+
     const topline = `
          <img src = ${logo_url} alt = ${"icon for " + currentURL} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
-        ${currentURL} <p style = "border: 0; margin: 0; padding: 0">
+        <b>${currentURL}<br></b> <span>
     `;
 
     AsyncLoop(() => {
-        timediv.innerHTML = topline + GetStopwatchTime(currTime) + "</p>";
+        timediv.innerHTML = topline + GetStopwatchTime(currTime) + "</span>";
     }, () => true);
 
-    
-    
-
-    /* const div = document.createElement("div");
-  div.innerHTML = `
-    <div style="
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #222;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      z-index: 999999;
-      font-family: sans-serif;
-    ">
-      🚀 Injected HTML Content!
-    </div>
-  `;
-  document.body.appendChild(div); */
 }
 
 function MakePort(){

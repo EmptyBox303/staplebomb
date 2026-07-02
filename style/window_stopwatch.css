@@ -1,4 +1,4 @@
-.expandedStopwatch{
+.collapsedStopwatch,.expandedStopwatch{
     position: fixed;
     width: 20vw;
     height: 15vh;
@@ -12,9 +12,29 @@
     box-sizing: border-box;
     vertical-align: middle;
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    border: 0; 
+    margin: 0; 
+    padding: 0;
 }
 
-.expandedStopwatchDrag{
+.expandedStopwatch span, .collapsedStopwatch span{
+    border: 0; 
+    margin: 0; 
+    padding: 0;
+    vertical-align: middle;
+    visibility: visible;
+}
+
+.collapsedStopwatch{
+    height: 9vh;
+    width: 14vw;
+}
+
+ .collapsedStopwatch b{
+    display: none;
+ }
+
+.stopwatchDrag{
     position: absolute;
     text-align:center; 
     bottom: 0; 
@@ -26,3 +46,13 @@
     width: 100%;
     z-index: 1000001;
 }
+
+.collapseClick{
+    position: absolute;
+    font-size: 10pt;
+    top: 8pt;
+    right: 5pt;
+    text-align:center;
+    box-sizing: border-box;
+}
+
