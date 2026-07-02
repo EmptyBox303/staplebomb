@@ -88,10 +88,10 @@ function InitWindowStopwatch(){
     const currentURL = ParseDomain(window.location.href);
     var div = document.createElement("div");
     div.className = "expandedStopwatch";
-    //<img src = ${logo_url} alt = ${"icon for " + currentURL}>
+    //
     div.innerHTML = 
     `
-        Viewport: ${window.innerWidth} x ${window.innerHeight} <br>
+        <img src = ${logo_url} alt = ${"icon for " + currentURL} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
         ${currentURL}
     `;
     document.body.appendChild(div);
