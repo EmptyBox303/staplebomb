@@ -3,9 +3,11 @@ async function send(message,port){
         port.postMessage(message);
     }
     catch(error){
-        console.warn(`message failed to send at ${port.name}: ${error}`);
+        console.log(`message failed to send at ${port.name}: ${error}`);
+        MakePort();
     }
 }
+
 
 async function AsyncLoop(action_fn,condition_fn){
     while(condition_fn()){
@@ -76,7 +78,7 @@ async function InitWindowStopwatch(){
 }
 
 function MakePort(){
-    var currentURL = window.location.href;
+    const currentURL = window.location.href;
     console.log("try again");
     const domain = ParseDomain(currentURL);
     var port;
@@ -84,7 +86,7 @@ function MakePort(){
         port = chrome.runtime.connect({name: currentURL});
     }
     catch(err){
-        console.warn(`Connection failed with ${port.name}: ${err}`);
+        console.warn(`Connection failed with ${currentURL}: ${err}`);
     }
     var beforeclose = true;
     var start_message = {
