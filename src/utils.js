@@ -89,6 +89,9 @@ function dragElement(elmnt) {
     e = e || window.event;
     e.preventDefault();
     // calculate the new cursor position:
+    //new right offset + new mouse x= old right offset + old mouse x - new mouse x ;
+    //new left offset  = old left offset - old mouse offset +new mouse offset;
+    //
     pos1 = pos3 - e.clientX;
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
@@ -99,9 +102,11 @@ function dragElement(elmnt) {
         top_offset = 0;
     if (top_offset > window.innerHeight - elmnt.offsetHeight) 
         top_offset = window.innerHeight - elmnt.offsetHeight;
-    //var left_offset = elmnt.offsetLeft - pos1;
 
-    var right_offset = window.innerWidth - (elmnt.offsetLeft - pos1) - elmnt.offsetWidth;
+    var right_str = elmnt.style.right;
+    console.log(typeof right_str);
+    var right_offset = Number(right_str.slice(0,(right_str.indexOf('p'))));
+    right_offset += pos1;
     if (right_offset < 0) 
         right_offset = 0; 
     if (right_offset > window.innerWidth - elmnt.offsetWidth) 
@@ -110,6 +115,10 @@ function dragElement(elmnt) {
     //console.log(right_offset);
     elmnt.style.top = top_offset + "px";
     elmnt.style.right = right_offset + "px";
+    /* console.log(elmnt.offsetLeft);
+    console.log("group");
+    console.log(left_offset); */
+
   }
 
   function closeDragElement() {

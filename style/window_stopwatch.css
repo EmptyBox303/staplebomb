@@ -2,8 +2,8 @@
     position: fixed;
     width: 20vw;
     height: 15vh;
-    right: 0;
-    top: 0;
+    right: 0px;
+    top: 0px;
     background-color:rgba(211,211,211,0.8);
     z-index: 1000000;
     color:black;
