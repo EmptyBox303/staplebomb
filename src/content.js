@@ -1,52 +1,102 @@
-async function send(message){
-    chrome.runtime.sendMessage(message, (response) => {
-        if (chrome.runtime.lastError) {
-            console.error("Message failed:", chrome.runtime.lastError);
-            return;
+async function send(message,port){
+    try{
+        port.postMessage(message);
+    }
+    catch(error){
+        console.warn(`message failed to send at ${port.name}: ${error}`);
+    }
+}
+
+
+
+
+
+//const vis = /* (document.visibilityState === "visible"); */ document.hasFocus();
+
+function MakePort(){
+    var currentURL = window.location.href;
+    console.log("try again");
+    const domain = ParseDomain(currentURL);
+    var port;
+    try{
+        port = chrome.runtime.connect({name: currentURL});
+    }
+    catch(err){
+        console.warn(`Connection failed with ${port.name}: ${err}`);
+    }
+    var beforeclose = true;
+    var start_message = {
+        name: domain,
+        inView: document.hasFocus(),
+        action: "OPEN",
+        time: Date.now()
+    }
+
+    // Listen for messages from background script
+
+
+
+    send(start_message,port);
+
+    port.onDisconnect.addListener(() => {
+        setTimeout(MakePort, 500); // retry after delay
+    });
+
+    window.addEventListener('blur', async () => {
+        const message = {
+            name: domain,
+            inView: false,
+            action: "HIDE",
+            time: Date.now()
         }
+        send(message,port);
+    });
+
+    window.addEventListener('focus', async () => {
+        const message = {
+            name: domain,
+            inView: true,
+            action: "SHOW",
+            time: Date.now()
+        }
+        send(message,port);
+    });
+
+    window.addEventListener("beforeunload", () => {
+        const message = {
+            name: domain,
+            inView: false,
+            action: "CLOSE",
+            time: Date.now()
+        }
+        send(message,port);
+        beforeclose = false;
+
+        if (port && !beforeclose){
+            try{
+                port.disconnect();
+            }catch(err){
+                console.warn("Disconnect failed: ", err);
+            }
+        }
+        
     });
 }
 
-
-
-let currentURL = window.location.href;
-console.log("try again");
-const domain = ParseDomain(currentURL);
-const create_message = {
-    type: "FOCUS",
-    time: Date.now(),
-    domain: domain
-}
-send(create_message);/* .catch((error) => {
-    console.error(`Error: ${error}`);
-}); */
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "injectionCheck") {
-    sendResponse({ isInjected : true });
-  }
-});
-window.addEventListener('blur', async () => {
-    const message = {
-        type: "BLUR",
-        time: Date.now(),
-        domain: domain
-    }
-    send(message);/* .catch((error) => {
-        console.error(`Error: ${error}`);
-    }); */
+  console.log("Content script received:", message);
+
+  // Optional: send a response back
+  sendResponse({ isInjected: true });
+
+  // Return true if you want to send an async response
+  return true;
 });
 
-window.addEventListener('focus', async () => {
-    const message = {
-        type: "FOCUS",
-        time: Date.now(),
-        domain: domain
-    }
-    send(message);/* .catch((error) => {
-        console.error(`Error: ${error}`);
-    }); */
-});
+
+MakePort();
+
+
 
 
 

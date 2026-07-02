@@ -13,11 +13,11 @@ function ParseDomain(url){
     }
     let domain_start = i+3;
     for(i = domain_start; i < l; i++){
-    if (currentURL[i] === '/' || currentURL[i] === ':')
+    if (url[i] === '/' || url[i] === ':')
         break;
     }
     //domain_end is either the end of the URL or at index of first / or : after scheme
     let domain_end = i;
-    let domain = currentURL.substring(domain_start,domain_end);
+    let domain = url.substring(domain_start,domain_end);
     return domain;
 }

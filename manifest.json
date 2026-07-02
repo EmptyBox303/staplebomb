@@ -3,16 +3,16 @@
   "name": "Pin Bomb",
   "version": "1.0",
   "description": "Track tab usage with pins. Blow them up with bombs.",
-  "permissions": ["activeTab","tabs","scripting"],
+  "permissions": ["activeTab","tabs","scripting","nativeMessaging"],
   "action": {
-    "default_popup": "popup.html",
     "default_icon": "pinbomb48.png"
   },
   "background": {
     "service_worker": "src/background.js"
   },
   "host_permissions": [
-    "*://*/*"
+    "http://*/*",
+    "https://*/*"
   ],
   "content_scripts": [
     {
