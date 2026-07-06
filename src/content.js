@@ -42,9 +42,9 @@ async function InitWindowStopwatch(){
     var innerbutton = document.createElement("button");
     innerbutton.dataset.collapse = "true";
     innerbutton.innerText = "-";
+    innerbutton.className = "collapseClick";
     buttondiv.appendChild(innerbutton);
 
-    buttondiv.className = "collapseClick";
     buttondiv.onclick = () =>{
         console.log("click");
         if (innerbutton.dataset.collapse === "true"){
@@ -90,7 +90,7 @@ function MakePort(){
             port_success = true;
         }
         catch(err){
-            console.warn(`Connection failed with ${currentURL}: ${err}`);
+            //console.warn(`Connection failed with ${currentURL}: ${err}`);
         }
         setTimeout(()=>{},1000);
         attempts ++;
@@ -176,9 +176,11 @@ function InjectionMarkerExist(){
 
 if (!InjectionMarkerExist()){
     MakeInjectionMarker();
-    InitWindowStopwatch();
-    
+    InitWindowStopwatch();   
 }
+
+//every time each website is switched to/from
+//a message is sent to background
 
 MakePort();
 

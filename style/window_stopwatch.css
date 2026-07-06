@@ -51,10 +51,18 @@
 
 .collapseClick{
     position: absolute;
+    background-color: rgb(180,180,180);
     font-size: 10pt;
     top: 8pt;
-    right: 5pt;
+    right: 10pt;
     text-align:center;
     box-sizing: border-box;
+    border-color: rgb(150, 150, 150);
+    border-style: outset;
+    border-width: 2pt;
+}
+
+.collapseClick:hover{
+    background-color: darkgray;
 }
 

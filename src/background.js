@@ -14,6 +14,7 @@ async function injectionCheck(tabId){
 
 
 async function InjectScripts(){
+    chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });
     try{
         
         chrome.tabs.query({}, async (tabs) => {
@@ -46,8 +47,11 @@ function ProcessMessage(message){
     console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
 }
 
-chrome.runtime.onStartup.addListener(
-    InjectScripts()
+chrome.runtime.onStartup.addListener(()=>{
+    InjectScripts();
+
+}
+    
 );
 
 chrome.runtime.onInstalled.addListener(
@@ -61,3 +65,11 @@ chrome.runtime.onConnect.addListener( (port) => {
         ProcessMessage(message);
     });
 });
+
+//each tab switch updates the "session" db
+//session db marks current website visited, and all segments of time of which the site was visited in unix
+//split into the "inView" and "offView" arrays
+//
+//at precise minute mark, background should form a "packet" of website use times and send to indexedDB
+//at precise hour mark, background should query packets in the last hour and form an hour packet to be consolidated into indexedDB
+//at precise day mark(UNIX_TIME % (3600*24*1000) == 0), background should query last 24 hour packets and form a day packet to be consolidated
