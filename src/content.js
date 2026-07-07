@@ -17,67 +17,7 @@ async function AsyncLoop(action_fn,condition_fn){
     }
 }
 
-async function InitWindowStopwatch(){
-    const logo_url = GetFaviconUrl();
-    const currentURL = ParseDomain(window.location.href);
-    const currTime = Date.now();
 
-    var div = document.createElement("div");
-    div.className = "expandedStopwatch";
-    document.body.appendChild(div);
-    
-    var timediv = document.createElement("div");
-    timediv.style = "margin: 15pt";
-    div.appendChild(timediv);
-    //
-    
-    
-    var dragdiv = document.createElement("div");
-    dragdiv.className = "stopwatchDrag";
-    dragdiv.innerText = "Drag";
-    div.appendChild(dragdiv);
-    dragElement(div);
-
-    var buttondiv = document.createElement("div");
-
-    var innerbutton = document.createElement("button");
-    innerbutton.dataset.collapse = "true";
-    innerbutton.innerText = "-";
-    innerbutton.className = "collapseClick";
-    buttondiv.appendChild(innerbutton);
-
-    buttondiv.onclick = () =>{
-        console.log("click");
-        if (innerbutton.dataset.collapse === "true"){
-            innerbutton.dataset.collapse = "false";
-            div.className = "collapsedStopwatch";
-            timediv.style = "margin: 8pt 15pt 15pt 15pt";
-            innerbutton.innerText = "+";
-
-        }
-        else if (innerbutton.dataset.collapse === "false"){
-            innerbutton.dataset.collapse = "true";
-            div.className = "expandedStopwatch";
-            timediv.style = "margin: 15pt";
-            innerbutton.innerText = "-";
-        }
-        else{
-            console.error("button error: invalid 'collapse' data");
-        }
-    };
-    div.appendChild(buttondiv);
-
-    const topline = `
-         <img src = ${logo_url} alt = ${"icon for " + currentURL} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
-        <b>${currentURL}<br></b> <span>
-    `;
-
-    
-    AsyncLoop(() => {
-        timediv.innerHTML = topline + GetStopwatchTime(currTime) + "</span>";
-    }, () => true);
-
-}
 
 function MakePort(){
     const currentURL = window.location.href;
@@ -104,19 +44,24 @@ function MakePort(){
     }
 
     
+
     var beforeclose = true;
-    var start_message = {
-        name: domain,
-        inView: document.hasFocus(),
-        action: "OPEN",
-        time: Date.now()
+    if (document.hasFocus()){
+        var start_message = {
+            name: domain,
+            inView: true,
+            action: "OPEN",
+            time: Date.now()
+        }
+        send(start_message,port,currentURL);
     }
+    
 
     // Listen for messages from background script
 
 
 
-    send(start_message,port,currentURL);
+    
 
     port.onDisconnect.addListener((p) => {
         if (p.error){
@@ -163,23 +108,90 @@ function MakePort(){
         }
         
     });
+
+
+    function MakeInjectionMarker(){
+        const div = document.createElement("div");
+        div.className = "staplebombInjectionMarker";
+        document.body.appendChild(div);
+    }
+
+    function InjectionMarkerExist(){
+        const mark = document.getElementsByClassName('staplebombInjectionMarker');
+        return (mark.length > 0);
+    }
+
+    async function InitWindowStopwatch(){
+        const logo_url = GetFaviconUrl();
+        const currentURL = ParseDomain(window.location.href);
+        const currTime = Date.now();
+
+        var div = document.createElement("div");
+        div.className = "expandedStopwatch";
+        document.body.appendChild(div);
+        
+        var timediv = document.createElement("div");
+        timediv.style = "margin: 15pt";
+        div.appendChild(timediv);
+        //
+        
+        
+        var dragdiv = document.createElement("div");
+        dragdiv.className = "stopwatchDrag";
+        dragdiv.innerText = "Drag";
+        div.appendChild(dragdiv);
+        dragElement(div);
+
+        var buttondiv = document.createElement("div");
+
+        var innerbutton = document.createElement("button");
+        innerbutton.dataset.collapse = "true";
+        innerbutton.innerText = "-";
+        innerbutton.className = "collapseClick";
+        buttondiv.appendChild(innerbutton);
+
+        buttondiv.onclick = () =>{
+            console.log("click");
+            if (innerbutton.dataset.collapse === "true"){
+                innerbutton.dataset.collapse = "false";
+                div.className = "collapsedStopwatch";
+                timediv.style = "margin: 8pt 15pt 15pt 15pt";
+                innerbutton.innerText = "+";
+
+            }
+            else if (innerbutton.dataset.collapse === "false"){
+                innerbutton.dataset.collapse = "true";
+                div.className = "expandedStopwatch";
+                timediv.style = "margin: 15pt";
+                innerbutton.innerText = "-";
+            }
+            else{
+                console.error("button error: invalid 'collapse' data");
+            }
+        };
+        div.appendChild(buttondiv);
+
+        const topline = `
+            <img src = ${logo_url} alt = ${"icon for " + currentURL} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
+            <b>${currentURL}<br></b> <span>
+        `;
+
+
+        AsyncLoop(() => {
+            timediv.innerHTML = topline + GetStopwatchTime(currTime) + "</span>";
+        }, () => true);
+
+    }
+
+    if (!InjectionMarkerExist()){
+        MakeInjectionMarker();
+        InitWindowStopwatch();   
+    }
 }
 
-function MakeInjectionMarker(){
-    const div = document.createElement("div");
-    div.className = "staplebombInjectionMarker";
-    document.body.appendChild(div);
-}
 
-function InjectionMarkerExist(){
-    const mark = document.getElementsByClassName('staplebombInjectionMarker');
-    return (mark.length > 0);
-}
 
-if (!InjectionMarkerExist()){
-    MakeInjectionMarker();
-    InitWindowStopwatch();   
-}
+
 
 //every time each website is switched to/from
 //a message is sent to background
@@ -194,3 +206,24 @@ MakePort();
 
 
 //alert(domain);
+
+//On hiding the tab:
+//pause timer
+//send to chrome.storage.local the "session time" of this tab being viewed
+//as in:
+/* chrome.storage.local.get([domain], (sessionSum) => {
+    if (sessionSum === null){
+        chrome.storage.local.set({domain, thisSessionTime});
+    }else{
+        const prevSum = sessionSum[domain];
+        chrome.storage.local.set({domain, prevSum + thisSessionTime});
+    }
+    
+    }) */
+
+
+//on showing the tab:
+//retrieve chrome.storage.local this domain
+//if none exist, use 0 as aggregateTime, and create an entry for 0
+//if exists, take as aggregateTime
+//use aggregateTime + Date.now() - startTime as timer
