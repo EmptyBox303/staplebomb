@@ -14,7 +14,7 @@ async function injectionCheck(tabId){
 
 
 async function InjectScripts(){
-    chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });
+    chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });
     try{
         
         chrome.tabs.query({}, async (tabs) => {
