@@ -10,9 +10,10 @@ async function send(message,port, url){
 
 
 async function AsyncLoop(action_fn,condition_fn){
+
     while(condition_fn()){
         action_fn();
-        await new Promise((resolve) => setTimeout(resolve,0));
+        await new Promise((resolve) => setTimeout(resolve,1));
     }
 }
 
@@ -71,6 +72,7 @@ async function InitWindowStopwatch(){
         <b>${currentURL}<br></b> <span>
     `;
 
+    
     AsyncLoop(() => {
         timediv.innerHTML = topline + GetStopwatchTime(currTime) + "</span>";
     }, () => true);
