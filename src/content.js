@@ -94,11 +94,11 @@ async function MakePort(){
 
         if (aggregate < saveAggregate){
             aggregate = saveAggregate;
-            chrome.storage.local.set({[domain]:aggregate}, () =>{
+            /* chrome.storage.local.set({[domain]:aggregate}, () =>{
                 if (chrome.runtime.lastError){
                     console.warn("local storage write error: ", chrome.runtime.lastError);
                 }
-            });
+            }); */
         }
 
         console.log("showing...");
@@ -115,39 +115,43 @@ async function MakePort(){
 
     async function HideTab(){
         stopwatchPause = true;
-        //in rare scenarios, tab switches occur too quickly; this results in possible sessionTime overwrite
-        //where a tab with advanced timer sends sessionTime to data
-        //a tab with regressed timer doesn't receive it
-        //and at hide, the regressed tab sends a regressed sessionTime with override.
-        //basic safeguard: sessionTime write is deferred if get sessionTime is more advanced;
-        chrome.storage.local.get([domain], (result) => {
+        var proposalTime;
+        /* chrome.storage.local.get([domain], (result) => {
             if (chrome.runtime.lastError){
                 console.warn("local storage read error: ", chrome.runtime.lastError);
+                proposalTime = sessionTime;
+
             }
             else if (Object.keys(result).length === 0){
+                proposalTime = sessionTime;
                 //if no such sessionTime exists?
                 //nothing to worry about, make write
             }
-            else if (result[domain] <= sessionTime){
-                //write
+            else if (result[domain] <= aggregate){
+                proposalTime = sessionTime;
             }
             else{
-                //don't write
+                proposalTime = sessionTime; //result[domain] + sessionTime - aggregate; 
             }
-        });
-        chrome.storage.local.set({[domain]: sessionTime}, () => {
+        }); */
+        proposalTime = sessionTime;
+        chrome.storage.local.set({[domain]: proposalTime}, () => {
             if (chrome.runtime.lastError){
                 console.warn("local storage write fail: ", chrome.runtime.lastError);
             }
         });
+        
         saveAggregate = sessionTime;
 
         
-        //On hiding the tab:
-        //pause timer
-        //send to chrome.storage.local the "session time" of this tab being viewed
-        //as in:
-        /*  */
+        //suppose somehow multiple time proposals are made before some semi-canonical time T
+        //we can reasonably assume that any sessionTime write will finish 1 second at the latest from when it is called
+        //given such circumstances we can assume that even if any time segment is buried/lost, the net effect is < 1 second
+        //protocol:
+        //at HideTab, get most recent proposal of sessionTime as T;
+        //if aggregate < T:
+        //  propose (sessionTime - aggregate + T)
+        //otherwise propose (sessionTime)
 
     }
 
