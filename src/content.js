@@ -19,7 +19,7 @@ async function AsyncLoop(action_fn,condition_fn, interval = 10){
 
 
 
-function MakePort(){
+async function MakePort(){
     const currentURL = window.location.href;
     console.log("try again");
     const domain = ParseDomain(currentURL);
@@ -27,13 +27,13 @@ function MakePort(){
     let port_success = false;
     let attempts = 0;
 
-    var aggregate;
+    var aggregate = 0;
     var stopwatchPause = false;
     var timediv;
     var topline;
     var startTime;
     var sessionTime;
-    var saveAggregate;
+    var saveAggregate = 0;
     while(!port_success && attempts < 10){
         try{
             port = chrome.runtime.connect({name: currentURL});
@@ -119,9 +119,21 @@ function MakePort(){
         //where a tab with advanced timer sends sessionTime to data
         //a tab with regressed timer doesn't receive it
         //and at hide, the regressed tab sends a regressed sessionTime with override.
-        //we need to make sure that our sessionTime writes are not overwriting a more advanced time;
+        //basic safeguard: sessionTime write is deferred if get sessionTime is more advanced;
         chrome.storage.local.get([domain], (result) => {
-
+            if (chrome.runtime.lastError){
+                console.warn("local storage read error: ", chrome.runtime.lastError);
+            }
+            else if (Object.keys(result).length === 0){
+                //if no such sessionTime exists?
+                //nothing to worry about, make write
+            }
+            else if (result[domain] <= sessionTime){
+                //write
+            }
+            else{
+                //don't write
+            }
         });
         chrome.storage.local.set({[domain]: sessionTime}, () => {
             if (chrome.runtime.lastError){
