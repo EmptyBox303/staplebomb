@@ -42,8 +42,8 @@ function GetFaviconUrl() {
     }
 }
 
-function GetStopwatchTime(startTime){
-    const timeDiff = (Date.now() - startTime);
+function GetStopwatchTime(t){
+    const timeDiff = t;
     const seconds = timeDiff % 60000;
     var second_str = String(seconds);
     if (second_str.length < 5){
