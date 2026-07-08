@@ -171,7 +171,7 @@ async function MakePort(){
         
         //make time div
             timediv = document.createElement("div");
-            timediv.style = "margin: 15pt; margin-bottom: 0pt";
+            timediv.style = "margin: 8pt 8pt 0pt 8pt;";
             div.appendChild(timediv);
         
         //add button to reset time for this domain
@@ -188,7 +188,7 @@ async function MakePort(){
                     }
                 });
             };
-            resetbutton.innerText = "Reset";
+            resetbutton.innerText = "Reset Session Time";
             resetbutton.className = "resetClick";
 
             resetdiv.appendChild(resetbutton);
@@ -215,7 +215,7 @@ async function MakePort(){
                 if (innerbutton.dataset.collapse === "true"){
                     innerbutton.dataset.collapse = "false";
                     div.className = "collapsedStopwatch";
-                    timediv.style = "margin: 8pt 15pt 15pt 15pt";
+                    //timediv.style = "margin: 8pt 15pt 15pt 15pt";
                     innerbutton.innerText = "+";
                     resetbutton.className = "resetClickCollapse";
 
@@ -223,7 +223,7 @@ async function MakePort(){
                 else if (innerbutton.dataset.collapse === "false"){
                     innerbutton.dataset.collapse = "true";
                     div.className = "expandedStopwatch";
-                    timediv.style = "margin: 15pt";
+                    //timediv.style = "margin: 8pt 8pt 0pt 8pt;";
                     innerbutton.innerText = "-";
                     resetbutton.className = "resetClick";
                 }
@@ -235,7 +235,7 @@ async function MakePort(){
 
         //
             topline = `
-                <img src = ${logo_url} alt = ${"icon for " + domain} width = "24" height = "24" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
+                <img src = ${logo_url} alt = ${"icon for " + domain} width = "16" height = "16" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
                 <b>${domain}<br></b> <span>
             `;
 

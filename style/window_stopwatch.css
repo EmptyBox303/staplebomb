@@ -1,16 +1,16 @@
 .collapsedStopwatch,.expandedStopwatch{
     position: fixed;
-    width: 20vw;
+    width: 15vw;
     height: 18vh;
     right: 0px;
     top: 0px;
     background-color:rgba(211,211,211,0.8);
     z-index: 1000000;
     color:black;
-    font-size: 12pt;
     line-height: 1.2;
     box-sizing: border-box;
     vertical-align: middle;
+    font-size: 10pt;
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     border: 0; 
     margin: 0; 
@@ -28,8 +28,8 @@
 
 
 .collapsedStopwatch{
-    height: 9vh;
-    width: 14vw;
+    height: 7vh;
+    width: 11vw;
 }
 
  .collapsedStopwatch b{
@@ -71,6 +71,8 @@
     width: 20pt;
     text-align: center;
     vertical-align: center;
+    font-size: 10pt;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 
@@ -80,9 +82,8 @@
     align-items: center; /* Vertical center */
     justify-content: center; /* Horizontal center (optional) */
     background-color: rgb(180,180,180);
-    font-size: 10pt;
-    top: 5pt;
-    left: 15pt;
+    top: 3pt;
+    left: 8pt;
     text-align:center;
     height: 15pt;
     box-sizing: border-box;
@@ -95,7 +96,9 @@
     border-radius: 0;
     text-align: center;
     vertical-align: center;
+    font-size: 10pt;
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: normal;
 }
 
 .resetClickCollapse{
