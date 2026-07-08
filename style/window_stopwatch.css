@@ -1,7 +1,7 @@
 .collapsedStopwatch,.expandedStopwatch{
     position: fixed;
     width: 20vw;
-    height: 15vh;
+    height: 18vh;
     right: 0px;
     top: 0px;
     background-color:rgba(211,211,211,0.8);
@@ -51,6 +51,9 @@
 
 .collapseClick{
     position: absolute;
+    display: flex;
+    align-items: center; /* Vertical center */
+    justify-content: center; /* Horizontal center (optional) */
     background-color: rgb(180,180,180);
     font-size: 10pt;
     top: 8pt;
@@ -60,6 +63,43 @@
     border-color: rgb(150, 150, 150);
     border-style: outset;
     border-width: 2pt;
+    background-attachment:fixed;
+    cursor: pointer;
+    color: black;
+    border-radius: 0;
+    height: 15pt;
+    width: 20pt;
+    text-align: center;
+    vertical-align: center;
+}
+
+
+.resetClick, .resetClickCollapse{
+    position:relative;
+    display: flex;
+    align-items: center; /* Vertical center */
+    justify-content: center; /* Horizontal center (optional) */
+    background-color: rgb(180,180,180);
+    font-size: 10pt;
+    top: 5pt;
+    left: 15pt;
+    text-align:center;
+    height: 15pt;
+    box-sizing: border-box;
+    border-color: rgb(150, 150, 150);
+    border-style: outset;
+    border-width: 2pt;
+    background-attachment:fixed;
+    cursor: pointer;
+    color: black;
+    border-radius: 0;
+    text-align: center;
+    vertical-align: center;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.resetClickCollapse{
+    display:none;
 }
 
 .collapseClick:hover{

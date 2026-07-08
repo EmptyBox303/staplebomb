@@ -62,6 +62,12 @@ async function MakePort(){
         return (mark.length > 0);
     }
 
+    async function updateLoop() {
+        AsyncLoop(() => {
+            sessionTime = aggregate + Date.now() - startTime;
+            timediv.innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
+        }, () => !stopwatchPause);
+    }
     async function ShowTab(){
         
         //on showing the tab:
@@ -105,10 +111,7 @@ async function MakePort(){
         if (stopwatchPause){
             console.log("show run?");
             stopwatchPause = false;
-            AsyncLoop(() => {
-                sessionTime = aggregate + Date.now() - startTime;
-                timediv.innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
-            }, () => !stopwatchPause);
+            updateLoop();
         }
         
     }
@@ -168,9 +171,28 @@ async function MakePort(){
         
         //make time div
             timediv = document.createElement("div");
-            timediv.style = "margin: 15pt";
+            timediv.style = "margin: 15pt; margin-bottom: 0pt";
             div.appendChild(timediv);
-            //
+        
+        //add button to reset time for this domain
+        //resetdiv
+            var resetdiv = document.createElement("div");
+
+            var resetbutton = document.createElement("button");
+            resetbutton.onclick = async () =>{
+                aggregate = 0;
+                startTime = Date.now();
+                chrome.storage.local.set({[domain]: 0}, () => {
+                    if (chrome.runtime.lastError){
+                        console.warn("local storage write error: ", chrome.runtime.lastError);
+                    }
+                });
+            };
+            resetbutton.innerText = "Reset";
+            resetbutton.className = "resetClick";
+
+            resetdiv.appendChild(resetbutton);
+            div.appendChild(resetdiv);
             
         //make draggable div
             var dragdiv = document.createElement("div");
@@ -195,6 +217,7 @@ async function MakePort(){
                     div.className = "collapsedStopwatch";
                     timediv.style = "margin: 8pt 15pt 15pt 15pt";
                     innerbutton.innerText = "+";
+                    resetbutton.className = "resetClickCollapse";
 
                 }
                 else if (innerbutton.dataset.collapse === "false"){
@@ -202,6 +225,7 @@ async function MakePort(){
                     div.className = "expandedStopwatch";
                     timediv.style = "margin: 15pt";
                     innerbutton.innerText = "-";
+                    resetbutton.className = "resetClick";
                 }
                 else{
                     console.error("button error: invalid 'collapse' data");
@@ -216,10 +240,8 @@ async function MakePort(){
             `;
 
 
-            AsyncLoop(() => {
-                sessionTime = aggregate + Date.now() - startTime;
-                timediv.innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
-            }, () => !stopwatchPause);
+            updateLoop();
+        
 
     }
 
