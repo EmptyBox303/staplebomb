@@ -96,6 +96,7 @@ async function MakePort(){
                 console.log("existing entry:",aggregate);
             }
             console.log("aggregate: ", aggregate);
+            console.log(`Show tab: latency ${Date.now() - startTime} ms`);
         });
 
         if (aggregate < saveAggregate){
@@ -107,12 +108,13 @@ async function MakePort(){
             });
         }
 
-        console.log("showing...");
+       // console.log("showing...");
         if (stopwatchPause){
-            console.log("show run?");
+           //console.log("show run?");
             stopwatchPause = false;
             updateLoop();
         }
+        
         
     }
 
