@@ -116,7 +116,7 @@ async function MakePort(){
     async function HideTab(){
         stopwatchPause = true;
         var proposalTime;
-        /* chrome.storage.local.get([domain], (result) => {
+        chrome.storage.local.get([domain], (result) => {
             if (chrome.runtime.lastError){
                 console.warn("local storage read error: ", chrome.runtime.lastError);
                 proposalTime = sessionTime;
@@ -131,15 +131,18 @@ async function MakePort(){
                 proposalTime = sessionTime;
             }
             else{
-                proposalTime = sessionTime; //result[domain] + sessionTime - aggregate; 
+                proposalTime = result[domain] + sessionTime - aggregate; 
             }
-        }); */
-        proposalTime = sessionTime;
-        chrome.storage.local.set({[domain]: proposalTime}, () => {
-            if (chrome.runtime.lastError){
-                console.warn("local storage write fail: ", chrome.runtime.lastError);
-            }
+            //console.log(proposalTime);
+            chrome.storage.local.set({[domain]: proposalTime}, () => {
+                if (chrome.runtime.lastError){
+                    console.warn("local storage write fail: ", chrome.runtime.lastError);
+                }
+            });
         });
+        
+        //proposalTime = sessionTime;
+        
         
         saveAggregate = sessionTime;
 
