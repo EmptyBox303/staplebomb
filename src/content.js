@@ -94,11 +94,11 @@ async function MakePort(){
 
         if (aggregate < saveAggregate){
             aggregate = saveAggregate;
-            /* chrome.storage.local.set({[domain]:aggregate}, () =>{
+            chrome.storage.local.set({[domain]:aggregate}, () =>{
                 if (chrome.runtime.lastError){
                     console.warn("local storage write error: ", chrome.runtime.lastError);
                 }
-            }); */
+            });
         }
 
         console.log("showing...");
