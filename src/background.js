@@ -44,40 +44,60 @@ async function InjectScripts(){
     
 }
 
-
+const tsName = "timeSegments";
 
 function ProcessMessage(message){
     console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
+    if (openDB && isDBOpen){
+        let db = openDB.result;
+        let tx = db.transaction(tsName);
+    }
 }
 
 
 // Open (or create) the database
 var openDB;
+var isDBOpen = false;
 
 self.addEventListener('terminate', () => {
     if (openDB){
         openDB.close();
         openDB = undefined;
+        isDBOpen = false;
     }
     console.log(`Database pending to close at ${Date.now()}`);
 });
 
 async function backgroundStart(){
     InjectScripts();
-    if (!openDB){
-        openDB = indexedDB.open("db", 1);
-    }
-    
-    openDB.onerror = () => {
+    if (openDB) return;
 
-    };
-
-    openDB.onupgradeneeded = () => {
-        let db = openDB.result;
-        if(!db.objectStoreNames.contains("timeSegments")){
-
+    async function OpenDatabase(i){
+        if (i > 10){
+            console.error("fatal: database cannot connect after maximum attempts; quitting");
+            return;
         }
-    };
+        openDB = indexedDB.open("db", 1);
+
+        openDB.onerror = () => setTimeout(OpenDatabase(i+1),500);
+
+        openDB.onupgradeneeded = () => {
+            let db = openDB.result;
+            if(!db.objectStoreNames.contains(tsName)){
+                let obstore = db.createObjectStore(tsName, {keyPath: "time"});
+                obstore.createIndex("domain","domain",{unique:false});
+                obstore.createIndex("isView","isView",{unique:false});
+            }
+        };  
+
+        openDB.onsuccess = () => {
+            isDBOpen = true;
+            console.log("DB is open");
+        }
+    }
+
+    OpenDatabase(0);
+    
 }
 
 chrome.runtime.onStartup.addListener(backgroundStart);
