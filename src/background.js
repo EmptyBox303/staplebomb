@@ -45,19 +45,25 @@ async function InjectScripts(){
 }
 
 const tsName = "timeSegments";
+var openDB;
+var isDBOpen = false;
 
 function ProcessMessage(message){
     console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
     if (openDB && isDBOpen){
         let db = openDB.result;
-        let tx = db.transaction(tsName);
+        let tx = db.transaction(tsName,"readwrite");
+        let store = tx.objectStore(tsName);
+        const putreq = store.put(message);
+        putreq.onerror = () => {
+            console.log("message not stored: ",message);
+        };
     }
 }
 
 
 // Open (or create) the database
-var openDB;
-var isDBOpen = false;
+
 
 self.addEventListener('terminate', () => {
     if (openDB){
@@ -86,7 +92,7 @@ async function backgroundStart(){
             if(!db.objectStoreNames.contains(tsName)){
                 let obstore = db.createObjectStore(tsName, {keyPath: "time"});
                 obstore.createIndex("domain","domain",{unique:false});
-                obstore.createIndex("isView","isView",{unique:false});
+                //obstore.createIndex("isView","isView",{unique:false});
             }
         };  
 
