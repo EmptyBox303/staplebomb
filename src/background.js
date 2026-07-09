@@ -44,28 +44,45 @@ async function InjectScripts(){
     
 }
 
+
+
 function ProcessMessage(message){
     console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
 }
 
 
 // Open (or create) the database
-var open = indexedDB.open("MyDatabase", 1);
+var openDB;
 
 self.addEventListener('terminate', () => {
-    console.log(Date.now());
+    if (openDB){
+        openDB.close();
+        openDB = undefined;
+    }
+    console.log(`Database pending to close at ${Date.now()}`);
 });
 
-chrome.runtime.onStartup.addListener(()=>{
+async function backgroundStart(){
     InjectScripts();
-
-}
+    if (!openDB){
+        openDB = indexedDB.open("db", 1);
+    }
     
-);
+    openDB.onerror = () => {
 
-chrome.runtime.onInstalled.addListener(
-    InjectScripts()
-);
+    };
+
+    openDB.onupgradeneeded = () => {
+        let db = openDB.result;
+        if(!db.objectStoreNames.contains("timeSegments")){
+
+        }
+    };
+}
+
+chrome.runtime.onStartup.addListener(backgroundStart);
+
+chrome.runtime.onInstalled.addListener(backgroundStart);
 
 
 chrome.runtime.onConnect.addListener( (port) => {
