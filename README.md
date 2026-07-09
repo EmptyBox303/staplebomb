@@ -1,11 +1,5 @@
 # staplebomb
-A web extension that keeps track of how long you spend on websites(soon). In the future it can destroy your tabs
-
-# background processes
-Every minute mark a package of use times is sent to IndexedDB for records keeping. An aggregate segment of the DB keeps track of aggregate times for each site, such as:
-- Total amount of time spent in the last 10 minutes
-- Total amount of time spent in the last hour
-- Total amount of time spent in the last 6 hours
-- Total amount of time spent in the last 24 hours
-
-Based on UNIX time factor 1000 * 3600 * 24, 
+A web extension that keeps track of how much time you spend viewing websites of different domains.
+Current functionalities:
+- Track total time usage across different sessions with chrome.storage.local; Reset tracking with a button; This comes in the form of a stopwatch and updates "live" as you spend time browsing.
+- (Work In Progress) Track time usage bounded by time period with info sent to IndexedDB(for example, time spent in the last 5 minutes, 10 minutes, 20 minutes, half hour, full hour, etc). A static version is to be made first, which only updates upon page refresh; future versions may periodically query and update.

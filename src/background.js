@@ -2,6 +2,7 @@
 //whenever a tab gets focused on, get Date.now()
 //
 
+
 async function injectionCheck(tabId){
     try{
         const reply = await chrome.tabs.sendMessage(tabId, "injectionCheck");
@@ -46,6 +47,14 @@ async function InjectScripts(){
 function ProcessMessage(message){
     console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
 }
+
+
+// Open (or create) the database
+var open = indexedDB.open("MyDatabase", 1);
+
+self.addEventListener('terminate', () => {
+    console.log(Date.now());
+});
 
 chrome.runtime.onStartup.addListener(()=>{
     InjectScripts();

@@ -81,7 +81,13 @@ async function MakePort(){
 
         if (aggregateRecord) return;
 
-        await new Promise((resolve) => {setTimeout(resolve,300)});
+        for(let i = 0; i < 30; i++){
+            await new Promise((resolve) => {setTimeout(resolve,10)});
+            if (!document.hasFocus()) return;
+        }
+        
+        //abort showtab if window is no longer focused;
+
         startTime = Date.now();
         chrome.storage.local.get([domain], (result) =>{
             if (chrome.runtime.lastError){
