@@ -28,12 +28,13 @@ async function MakePort(){
     let attempts = 0;
 
     var aggregate = 0;
-    var stopwatchPause = false;
+    var stopwatchPause = true;
     var timediv;
     var topline;
     var startTime;
     var sessionTime;
     var saveAggregate = 0;
+    var aggregateRecord = false;
     while(!port_success && attempts < 10){
         try{
             port = chrome.runtime.connect({name: currentURL});
@@ -75,6 +76,12 @@ async function MakePort(){
         //if none exist, use 0 as aggregateTime, and create an entry for 0
         //if exists, take as aggregateTime
         //use aggregateTime + Date.now() - startTime as timer
+
+        timediv.innerHTML = topline + "Loading...</span>";
+
+        if (aggregateRecord) return;
+
+        await new Promise((resolve) => {setTimeout(resolve,300)});
         startTime = Date.now();
         chrome.storage.local.get([domain], (result) =>{
             if (chrome.runtime.lastError){
@@ -109,18 +116,26 @@ async function MakePort(){
         }
 
        // console.log("showing...");
-        if (stopwatchPause){
-           //console.log("show run?");
-            stopwatchPause = false;
-            updateLoop();
-        }
+        stopwatchPause = false;
+        updateLoop();
+        aggregateRecord = true;
         
         
     }
 
     async function HideTab(){
+        if (!aggregateRecord) return;
+        aggregateRecord = false;
         stopwatchPause = true;
         var proposalTime;
+        proposalTime = sessionTime;
+        chrome.storage.local.set({[domain]: proposalTime}, () => {
+                if (chrome.runtime.lastError){
+                    console.warn("local storage write fail: ", chrome.runtime.lastError);
+                }
+                console.log(`Hide tab latency: ${Date.now() - thisTimeTest} ms`);
+        });
+        /* let thisTimeTest = Date.now();
         chrome.storage.local.get([domain], (result) => {
             if (chrome.runtime.lastError){
                 console.warn("local storage read error: ", chrome.runtime.lastError);
@@ -143,8 +158,9 @@ async function MakePort(){
                 if (chrome.runtime.lastError){
                     console.warn("local storage write fail: ", chrome.runtime.lastError);
                 }
+                console.log(`Hide tab latency: ${Date.now() - thisTimeTest} ms`);
             });
-        });
+        }); */
         
         //proposalTime = sessionTime;
         
@@ -242,7 +258,7 @@ async function MakePort(){
             `;
 
 
-            updateLoop();
+            //updateLoop();
         
 
     }
