@@ -49,7 +49,7 @@ var openDB;
 var isDBOpen = false;
 
 function ProcessMessage(message){
-    console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
+    
     if (openDB && isDBOpen){
         let db = openDB.result;
         let tx = db.transaction(tsName,"readwrite");
@@ -58,6 +58,9 @@ function ProcessMessage(message){
         putreq.onerror = () => {
             console.log("message not stored: ",message);
         };
+        putreq.onsuccess = () =>{
+            console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
+        }
     }
 }
 

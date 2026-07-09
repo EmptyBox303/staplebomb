@@ -1,7 +1,7 @@
 .collapsedStopwatch,.expandedStopwatch{
     position: fixed;
     width: 15vw;
-    height: 18vh;
+    height: 30vh;
     right: 0px;
     top: 0px;
     background-color:rgba(211,211,211,0.8);
@@ -26,6 +26,11 @@
 }
 
 
+.stopwatchHidden{
+    display: none;
+}
+
+
 
 .collapsedStopwatch{
     height: 7vh;
@@ -47,6 +52,7 @@
     box-sizing: border-box;
     width: 100%;
     z-index: 1000001;
+    cursor: move;
 }
 
 .collapseClick{
@@ -107,5 +113,6 @@
 
 .collapseClick:hover{
     background-color: darkgray;
+    cursor: pointer;
 }
 

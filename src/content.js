@@ -21,6 +21,28 @@ async function AsyncLoop(action_fn,condition_fn, interval = 10){
 
 async function MakePort(){
     const currentURL = window.location.href;
+    
+    const PrecisionPolicies = Object.freeze({
+        FLOATING: 1,
+        SECOND: 1000,
+        MINUTE: 60000,
+        HOUR: 3600000,
+        DAY: 24*3600000
+    });
+
+    const trackingModes = [
+        new MonitorTime(15,"15 minutes",PrecisionPolicies.FLOATING),
+        new MonitorTime(30,"half hour",PrecisionPolicies.FLOATING),
+        new MonitorTime(60,"hour",PrecisionPolicies.MINUTE),
+        new MonitorTime(120,"2 hours",PrecisionPolicies.MINUTE),
+        new MonitorTime(360,"6 hours",PrecisionPolicies.HOUR),
+        new MonitorTime(1440, "day", PrecisionPolicies.HOUR),
+        new MonitorTime(2880, "2 days", PrecisionPolicies.HOUR),
+        new MonitorTime(7*1440, "week", PrecisionPolicies.DAY),
+        new MonitorTime(30*1440, "month", PrecisionPolicies.DAY),
+        new MonitorTime(365*1440, "year", PrecisionPolicies.DAY),
+    ];
+
     console.log("try again");
     const domain = ParseDomain(currentURL);
     var port;
@@ -29,7 +51,8 @@ async function MakePort(){
 
     var aggregate = 0;
     var stopwatchPause = true;
-    var timediv;
+    var timediv = {};
+    var hidediv = {};
     var topline;
     var startTime;
     var sessionTime;
@@ -66,7 +89,7 @@ async function MakePort(){
     async function updateLoop() {
         AsyncLoop(() => {
             sessionTime = aggregate + Date.now() - startTime;
-            timediv.innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
+            timediv[0].innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
         }, () => !stopwatchPause);
     }
     async function ShowTab(){
@@ -77,7 +100,7 @@ async function MakePort(){
         //if exists, take as aggregateTime
         //use aggregateTime + Date.now() - startTime as timer
 
-        timediv.innerHTML = topline + "Loading...</span>";
+        timediv[0].innerHTML = topline + "Loading...</span>";
 
         if (aggregateRecord) return;
 
@@ -193,10 +216,25 @@ async function MakePort(){
             div.className = "expandedStopwatch";
             document.body.appendChild(div);
         
-        //make time div
-            timediv = document.createElement("div");
-            timediv.style = "margin: 8pt 8pt 0pt 8pt;";
-            div.appendChild(timediv);
+        //make time div 0 (session div)
+            timediv[0] = document.createElement("div");
+            timediv[0].style = "margin: 8pt 8pt 0pt 8pt;";
+            div.appendChild(timediv[0]);
+
+            hidediv[0] = document.createElement("div");
+            hidediv[0].innerText = "This is meant to be hidden until hover";
+            hidediv[0].className = "stopwatchHidden";
+            hidediv[0].style = "margin: 0pt 8pt 0pt 8pt";
+            div.appendChild(hidediv[0]);
+
+            timediv[0].addEventListener('mouseenter',() => {
+                hidediv[0].style.display = 'block';
+            });
+
+            timediv[0].addEventListener('mouseleave',() => {
+                hidediv[0].style.display = 'none';
+            });
+            
         
         //add button to reset time for this domain
         //resetdiv
@@ -212,7 +250,7 @@ async function MakePort(){
                     }
                 });
             };
-            resetbutton.innerText = "Reset Session Time";
+            resetbutton.innerText = "Reset Session";
             resetbutton.className = "resetClick";
 
             resetdiv.appendChild(resetbutton);
@@ -260,7 +298,7 @@ async function MakePort(){
         //
             topline = `
                 <img src = ${logo_url} alt = ${"icon for " + domain} width = "16" height = "16" style= "display: inline-block; vertical-align: middle; margin: 0; padding: 0">
-                <b>${domain}<br></b> <span>
+                <b>${domain}<br> Session: </b> <span>
             `;
 
 
@@ -288,13 +326,6 @@ async function MakePort(){
         ShowTab();
     }
     
-
-    // Listen for messages from background script
-
-
-
-    
-
     port.onDisconnect.addListener((p) => {
         if (p.error){
             console.error(p);
@@ -352,23 +383,4 @@ async function MakePort(){
 }
 
 
-
-
-
-//every time each website is switched to/from
-//a message is sent to background
-
 MakePort();
-
-
-
-
-
-
-
-
-//alert(domain);
-
-
-
-

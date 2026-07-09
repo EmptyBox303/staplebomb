@@ -127,3 +127,9 @@ function dragElement(elmnt) {
     document.onmousemove = null;
   }
 }
+
+function MonitorTime(minute_time,time_name,policy){
+    this.time = minute_time;
+    this.name = time_name;
+    this.policy = policy;
+}
