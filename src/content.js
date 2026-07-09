@@ -76,6 +76,7 @@ async function MakePort(){
     var sessionTime;
     var saveAggregate = 0;
     var aggregateRecord = false;
+    var sessionStart;
     while(!port_success && attempts < 10){
         try{
             port = chrome.runtime.connect({name: currentURL});
@@ -109,6 +110,9 @@ async function MakePort(){
             sessionTime = aggregate + Date.now() - startTime;
             timediv[0].innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
         }, () => !stopwatchPause);
+        AsyncLoop(() => {
+            hidediv[0].innerText = `Since: ${(sessionStart !== undefined) ? UNIXtoDate(sessionStart) : ""}`;
+        }, () => !stopwatchPause,1000);
     }
     async function ShowTab(){
         
@@ -139,23 +143,26 @@ async function MakePort(){
             else if (Object.keys(result).length === 0){
                 aggregate = saveAggregate;
                 console.log("no entry");
-                chrome.storage.local.set({[domain]: 0}, () => {
+                sessionStart = Date.now();
+                chrome.storage.local.set({[domain]: {time:0,start:sessionStart}}, () => {
                     if (chrome.runtime.lastError){
                         console.warn("local storage write error: ", chrome.runtime.lastError);
                     }
                 });
             }
             else{
-                aggregate = result[domain];
+                aggregate = result[domain].time;
+                sessionStart = result[domain].start;
                 console.log("existing entry:",aggregate);
+                console.log("sessionstart: ",sessionStart);
             }
-            console.log("aggregate: ", aggregate);
+            //console.log("aggregate: ", aggregate);
             console.log(`Show tab: latency ${Date.now() - startTime} ms`);
         });
 
         if (aggregate < saveAggregate){
             aggregate = saveAggregate;
-            chrome.storage.local.set({[domain]:aggregate}, () =>{
+            chrome.storage.local.set({[domain]:{time:aggregate, start:sessionStart}}, () =>{
                 if (chrome.runtime.lastError){
                     console.warn("local storage write error: ", chrome.runtime.lastError);
                 }
@@ -176,7 +183,7 @@ async function MakePort(){
         stopwatchPause = true;
         var proposalTime;
         proposalTime = sessionTime;
-        chrome.storage.local.set({[domain]: proposalTime}, () => {
+        chrome.storage.local.set({[domain]: {time:proposalTime,start:sessionStart}}, () => {
                 if (chrome.runtime.lastError){
                     console.warn("local storage write fail: ", chrome.runtime.lastError);
                 }
@@ -241,7 +248,6 @@ async function MakePort(){
 
             hidediv[0] = document.createElement("div");
             hidediv[0].style = "margin: 0pt 8pt 0pt 8pt; font-size: 8pt;";
-            hidediv[0].innerText = "This is meant to be hidden until hover";
             div.appendChild(hidediv[0]);
 
             MakeHiddenUntilHover(timediv[0],hidediv[0]);
@@ -255,7 +261,8 @@ async function MakePort(){
             resetbutton.onclick = async () =>{
                 aggregate = 0;
                 startTime = Date.now();
-                chrome.storage.local.set({[domain]: 0}, () => {
+                sessionStart = startTime;
+                chrome.storage.local.set({[domain]: {time: 0, start:startTime}}, () => {
                     if (chrome.runtime.lastError){
                         console.warn("local storage write error: ", chrome.runtime.lastError);
                     }

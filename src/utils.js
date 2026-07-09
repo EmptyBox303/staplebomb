@@ -133,3 +133,12 @@ function MonitorTime(minute_time,time_name,policy){
     this.name = time_name;
     this.policy = policy;
 }
+
+//copied from GeekforGeeks
+function UNIXtoDate(unixTime){
+
+    // Convert to milliseconds and
+    // then create a new Date object
+    let dateObj = new Date(unixTime);
+    return dateObj.toLocaleString();
+}
