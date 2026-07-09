@@ -17,6 +17,17 @@ async function AsyncLoop(action_fn,condition_fn, interval = 10){
     }
 }
 
+function MakeHiddenUntilHover(divToHover,divToHide){
+    divToHide.style.display = 'none';
+    divToHover.addEventListener('mouseenter',() => {
+        divToHide.style.display = 'block';
+    });
+
+    divToHover.addEventListener('mouseleave',() => {
+        divToHide.style.display = 'none';
+    });
+}
+
 
 
 async function MakePort(){
@@ -222,18 +233,11 @@ async function MakePort(){
             div.appendChild(timediv[0]);
 
             hidediv[0] = document.createElement("div");
+            hidediv[0].style = "margin: 0pt 8pt 0pt 8pt; font-size: 8pt;";
             hidediv[0].innerText = "This is meant to be hidden until hover";
-            hidediv[0].className = "stopwatchHidden";
-            hidediv[0].style = "margin: 0pt 8pt 0pt 8pt";
             div.appendChild(hidediv[0]);
 
-            timediv[0].addEventListener('mouseenter',() => {
-                hidediv[0].style.display = 'block';
-            });
-
-            timediv[0].addEventListener('mouseleave',() => {
-                hidediv[0].style.display = 'none';
-            });
+            MakeHiddenUntilHover(timediv[0],hidediv[0]);
             
         
         //add button to reset time for this domain
