@@ -20,7 +20,14 @@ async function AsyncLoop(action_fn,condition_fn, interval = 10){
 function MakeHiddenUntilHover(divToHover,divToHide){
     divToHide.style.display = 'none';
     divToHover.addEventListener('mouseenter',() => {
-        divToHide.style.display = 'block';
+        let s = divToHover.parentElement.className;
+        if (s.startsWith("collapsed")){
+            divToHide.style.display = 'none';
+        }
+        else{
+            divToHide.style.display = 'block';
+        }
+        
     });
 
     divToHover.addEventListener('mouseleave',() => {
