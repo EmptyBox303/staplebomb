@@ -41,11 +41,11 @@ async function MakePort(){
     const currentURL = window.location.href;
     
     const PrecisionPolicies = Object.freeze({
-        FLOATING: 1,
-        SECOND: 1000,
-        MINUTE: 60000,
-        HOUR: 3600000,
-        DAY: 24*3600000
+        FLOATING: Instr(1,"float"),
+        SECOND: Instr(1e3,"second"),
+        MINUTE: Instr(6e4,"minute"),
+        HOUR: Instr(36e5,"hour"),
+        DAY: Instr(864e5,"day")
     });
 
     const trackingModes = [

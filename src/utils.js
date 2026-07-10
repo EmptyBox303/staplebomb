@@ -134,6 +134,11 @@ function MonitorTime(minute_time,time_name,policy){
     this.policy = policy;
 }
 
+function Instr(unit,name){
+    this.unit = unit;
+    this.name = name;
+}
+
 //copied from GeekforGeeks
 function UNIXtoDate(unixTime){
 
