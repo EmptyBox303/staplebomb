@@ -283,7 +283,50 @@ async function MakePort(){
             resetbutton.className = "resetClick";
 
             resetdiv.appendChild(resetbutton);
+            
+            var resetline = document.createElement("hr");
+            resetline.style.position = "relative";
+            resetline.style.top = "1pt";
+            resetline.style.border = "0.5px solid";
+            resetline.style.margin = "8pt 4pt 8pt 4pt";
+            resetdiv.appendChild(resetline);
             div.appendChild(resetdiv);
+
+            var selectdiv = document.createElement("div");
+
+            var selectspan = document.createElement("span");
+            selectspan.style.marginLeft = "8pt";
+            selectspan.style.verticalAlign = "center";
+            
+            selectdiv.appendChild(selectspan);
+            selectspan.innerText = "Track usage across the last";
+
+            var selectTrack = document.createElement("select");
+            selectdiv.appendChild(selectTrack);
+            selectdiv.style.display = "inline";
+
+            selectTrack.id = "selectTrack";
+            selectTrack.style.verticalAlign = "center";
+            //selectTrack.style.display = "inherit";
+            selectTrack.style.margin = "0pt 2pt 0pt 2pt";
+            selectTrack.style.paddingInlineStart = "0px";
+            selectTrack.required = true;
+            /* font-size: 10pt; */
+            selectTrack.style.fontFamily = "'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif";
+            div.appendChild(selectdiv);
+            
+            let defop = document.createElement("option");
+            defop.innerText = "Choose time...";
+            defop.hidden = true;
+            defop.disabled = true;
+            defop.defaultSelected = true;
+            selectTrack.appendChild(defop);
+            trackingModes.forEach((trackMode) => {
+                let choice = document.createElement("option");
+                choice.value = JSON.stringify(trackMode);
+                choice.innerText = trackMode.name;
+                selectTrack.appendChild(choice);
+            });
             
         //make draggable div
             var dragdiv = document.createElement("div");
@@ -309,6 +352,8 @@ async function MakePort(){
                     //timediv.style = "margin: 8pt 15pt 15pt 15pt";
                     innerbutton.innerText = "+";
                     resetbutton.className = "resetClickCollapse";
+                    selectdiv.style.display = "none";
+                    //console.log(selectdiv.style.display);
 
                 }
                 else if (innerbutton.dataset.collapse === "false"){
@@ -317,6 +362,8 @@ async function MakePort(){
                     //timediv.style = "margin: 8pt 8pt 0pt 8pt;";
                     innerbutton.innerText = "-";
                     resetbutton.className = "resetClick";
+                    selectdiv.style.display = "inline";
+
                 }
                 else{
                     console.error("button error: invalid 'collapse' data");

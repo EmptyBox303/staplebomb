@@ -1,6 +1,6 @@
 .collapsedStopwatch,.expandedStopwatch{
     position: fixed;
-    width: 15vw;
+    width: 19vw;
     height: 30vh;
     right: 0px;
     top: 0px;
@@ -77,6 +77,10 @@
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
+.collapseClick:active{
+    border-style:inset;
+}
+
 
 .resetClick, .resetClickCollapse{
     position:relative;
@@ -101,6 +105,10 @@
     font-size: 10pt;
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-weight: normal;
+}
+
+.resetClick:active{
+    border-style:inset;
 }
 
 .resetClickCollapse{
