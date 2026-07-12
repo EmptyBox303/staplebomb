@@ -41,11 +41,11 @@ async function MakePort(){
     const currentURL = window.location.href;
     
     const PrecisionPolicies = Object.freeze({
-        FLOATING: Instr(1,"float"),
-        SECOND: Instr(1e3,"second"),
-        MINUTE: Instr(6e4,"minute"),
-        HOUR: Instr(36e5,"hour"),
-        DAY: Instr(864e5,"day")
+        FLOATING: new Instr(1,"float"),
+        SECOND: new Instr(1e3,"second"),
+        MINUTE: new Instr(6e4,"minute"),
+        HOUR: new Instr(36e5,"hour"),
+        DAY: new Instr(864e5,"day")
     });
 
     const trackingModes = [
@@ -77,6 +77,10 @@ async function MakePort(){
     var saveAggregate = 0;
     var aggregateRecord = false;
     var sessionStart;
+    var selectTrack;
+    var selectTimer;
+    var selectChoice = null;
+
     while(!port_success && attempts < 10){
         try{
             port = chrome.runtime.connect({name: currentURL});
@@ -108,6 +112,7 @@ async function MakePort(){
     async function updateLoop() {
         AsyncLoop(() => {
             sessionTime = aggregate + Date.now() - startTime;
+            //selectTrack.className = "";
             timediv[0].innerHTML = topline + GetStopwatchTime(sessionTime) + "</span>";
         }, () => !stopwatchPause);
         /* AsyncLoop(() => {
@@ -176,6 +181,8 @@ async function MakePort(){
        // console.log("showing...");
         stopwatchPause = false;
         updateLoop();
+        //loadSelectTime();
+        //the time refresh should only 
         aggregateRecord = true;
         
         
@@ -235,6 +242,33 @@ async function MakePort(){
         //  propose (sessionTime - aggregate + T)
         //otherwise propose (sessionTime)
 
+    }
+
+    async function loadSelectTime(){
+        const choice = selectChoice;
+        if (choice === null){
+            selectTimer.innerText = "";
+        }
+        selectTimer.innerText = `Loading past ${choice.name}`;
+        selectTimer.innerText = 'Done!';
+
+        const dbload = choice.policy.name;
+        if (dbload === "float"){
+
+        }
+        //when a choice is freshly made:
+        //change a variable to signify change of choice
+        //initiate a loop that periodically refreshes selectTimer.innertext based on query
+        //this frequency depends on selected policy
+        //loop is temporarily interrupted by hideTab but reinitiated on showTab
+        //if a showTab occurs outside the loop period(e.g. 10 seconds, minute, 30 minutes, etc), the loop would have been actually stopped and reinitiated
+        //however, if a showTab occurs within the loop period, we need a mechanism for it to be ignored and for the original loop to continue unimpeded
+        //boolean variable selectRequireInit indicates if a fixed update timer requires initiation by showTab
+        //on reaching end of a loop and realizing tab is hidden, set selectRequireInit true and break from loop
+        //otherwise selectRequireInit set to false
+
+
+        //another break condition is 
     }
 
     async function InitWindowStopwatch(){
@@ -301,18 +335,22 @@ async function MakePort(){
             selectdiv.appendChild(selectspan);
             selectspan.innerText = "Track usage across the last";
 
-            var selectTrack = document.createElement("select");
+            selectTrack = document.createElement("select");
+            
             selectdiv.appendChild(selectTrack);
             selectdiv.style.display = "inline";
 
             selectTrack.id = "selectTrack";
-            selectTrack.style.verticalAlign = "center";
-            //selectTrack.style.display = "inherit";
-            selectTrack.style.margin = "0pt 2pt 0pt 2pt";
-            selectTrack.style.paddingInlineStart = "0px";
+            
             selectTrack.required = true;
             /* font-size: 10pt; */
-            selectTrack.style.fontFamily = "'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif";
+
+            selectTimer = document.createElement("span");
+            selectdiv.appendChild(selectTimer);
+            selectTimer.innerText = "";
+            selectTimer.style = `
+                margin-left: 8pt;
+            `;
             div.appendChild(selectdiv);
             
             let defop = document.createElement("option");
@@ -323,6 +361,7 @@ async function MakePort(){
             selectTrack.appendChild(defop);
             trackingModes.forEach((trackMode) => {
                 let choice = document.createElement("option");
+                console.log(trackMode);
                 choice.value = JSON.stringify(trackMode);
                 choice.innerText = trackMode.name;
                 selectTrack.appendChild(choice);
@@ -379,6 +418,17 @@ async function MakePort(){
 
 
             //updateLoop();
+        //add detection to selectTrack
+        //once a choice has been made
+        //update choice
+        //run database collect happens either
+        //at showTab(after choice is made)
+        //or right after the change
+        selectTrack.addEventListener('change', async () => {
+            selectTimer.innerText = "hi";
+            selectChoice = JSON.parse(selectTrack.value);
+            loadSelectTime();
+        });
         
 
     }

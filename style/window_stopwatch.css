@@ -1,6 +1,6 @@
 .collapsedStopwatch,.expandedStopwatch{
     position: fixed;
-    width: 19vw;
+    width: 17vw;
     height: 30vh;
     right: 0px;
     top: 0px;
@@ -118,5 +118,33 @@
 .collapseClick:hover{
     background-color: darkgray;
     cursor: pointer;
+}
+
+#selectTrack{
+    appearance: none;
+    vertical-align: center;
+    text-align: center;
+    font-size: 9pt;
+    margin: 0pt 0pt 0pt 4pt;
+    padding-inline-start: 0px;
+    background-color: white;
+    background-attachment:none;
+    background: no-repeat white right;
+    background-image: none;
+    border-radius: 2px;
+    padding: 0px;
+    border: 1px;
+    background-position-x: 0%;
+    background-position-y: 0%;
+    display: inline-block;
+    line-height: normal;
+    min-block-size: 0px;
+    min-width: 0px;
+    width: fit-content;
+    height: fit-content;
+    min-height: 0px;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color:black;
+    z-index: 2000000;
 }
 
