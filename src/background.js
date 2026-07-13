@@ -86,7 +86,7 @@ async function backgroundStart(){
             console.error("fatal: database cannot connect after maximum attempts; quitting");
             return;
         }
-        openDB = indexedDB.open("db", 1);
+        openDB = indexedDB.open("db", 3);
 
         openDB.onerror = () => setTimeout(OpenDatabase(i+1),500);
 
@@ -94,12 +94,15 @@ async function backgroundStart(){
             let db = openDB.result;
             if(!db.objectStoreNames.contains(tsName)){
                 let obstore = db.createObjectStore(tsName, {keyPath: "time"});
-                obstore.createIndex("domain","domain",{unique:false});
+                obstore.createIndex("website",["name","time"],{unique:false});
+
                 //obstore.createIndex("isView","isView",{unique:false});
             }
         };  
 
         openDB.onsuccess = () => {
+            let db = openDB.result;
+            console.log(db.objectStoreNames);
             isDBOpen = true;
             console.log("DB is open");
         }

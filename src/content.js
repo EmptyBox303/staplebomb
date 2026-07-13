@@ -80,6 +80,8 @@ async function MakePort(){
     var selectTrack;
     var selectTimer;
     var selectChoice = null;
+    var selectRequireInit = false;
+    const tsName = "timeSegments";
 
     while(!port_success && attempts < 10){
         try{
@@ -181,8 +183,9 @@ async function MakePort(){
        // console.log("showing...");
         stopwatchPause = false;
         updateLoop();
-        //loadSelectTime();
-        //the time refresh should only 
+        if(selectRequireInit){
+            //reinit loop
+        }
         aggregateRecord = true;
         
         
@@ -200,51 +203,13 @@ async function MakePort(){
             }
                 //console.log(`Hide tab latency: ${Date.now() - thisTimeTest} ms`);
         });
-        /* let thisTimeTest = Date.now();
-        chrome.storage.local.get([domain], (result) => {
-            if (chrome.runtime.lastError){
-                console.warn("local storage read error: ", chrome.runtime.lastError);
-                proposalTime = sessionTime;
-
-            }
-            else if (Object.keys(result).length === 0){
-                proposalTime = sessionTime;
-                //if no such sessionTime exists?
-                //nothing to worry about, make write
-            }
-            else if (result[domain] <= aggregate){
-                proposalTime = sessionTime;
-            }
-            else{
-                proposalTime = result[domain] + sessionTime - aggregate; 
-            }
-            //console.log(proposalTime);
-            chrome.storage.local.set({[domain]: proposalTime}, () => {
-                if (chrome.runtime.lastError){
-                    console.warn("local storage write fail: ", chrome.runtime.lastError);
-                }
-                console.log(`Hide tab latency: ${Date.now() - thisTimeTest} ms`);
-            });
-        }); */
-        
-        //proposalTime = sessionTime;
         
         
         saveAggregate = sessionTime;
 
-        
-        //suppose somehow multiple time proposals are made before some semi-canonical time T
-        //we can reasonably assume that any sessionTime write will finish 1 second at the latest from when it is called
-        //given such circumstances we can assume that even if any time segment is buried/lost, the net effect is < 1 second
-        //protocol:
-        //at HideTab, get most recent proposal of sessionTime as T;
-        //if aggregate < T:
-        //  propose (sessionTime - aggregate + T)
-        //otherwise propose (sessionTime)
-
     }
 
-    async function loadSelectTime(){
+    async function SelectTimeLoop(){
         const choice = selectChoice;
         if (choice === null){
             selectTimer.innerText = "";
@@ -253,22 +218,31 @@ async function MakePort(){
         selectTimer.innerText = 'Done!';
 
         const dbload = choice.policy.name;
-        if (dbload === "float"){
+        const isFloat = (dbload === "float");
+        const loopInterval = (isFloat) ? 5000 : choice.policy.unit;
 
+
+        while(selectChoice === choice){
+
+            //do a bunch of stuff and set selectTimer, etc
+            
+            if(!isFloat){
+                selectTimer.innerText = `Not done yet: ${Date.now()}`;
+            }
+            else{
+                const timeRange = choice.time * 60000;
+
+            }
+            
+            break;
+
+            await new Promise ((resolve) => setTimeout(resolve,loopInterval));
+
+            if (!document.hasFocus()){
+                selectRequireInit = true;
+                break;
+            }
         }
-        //when a choice is freshly made:
-        //change a variable to signify change of choice
-        //initiate a loop that periodically refreshes selectTimer.innertext based on query
-        //this frequency depends on selected policy
-        //loop is temporarily interrupted by hideTab but reinitiated on showTab
-        //if a showTab occurs outside the loop period(e.g. 10 seconds, minute, 30 minutes, etc), the loop would have been actually stopped and reinitiated
-        //however, if a showTab occurs within the loop period, we need a mechanism for it to be ignored and for the original loop to continue unimpeded
-        //boolean variable selectRequireInit indicates if a fixed update timer requires initiation by showTab
-        //on reaching end of a loop and realizing tab is hidden, set selectRequireInit true and break from loop
-        //otherwise selectRequireInit set to false
-
-
-        //another break condition is 
     }
 
     async function InitWindowStopwatch(){
@@ -427,7 +401,7 @@ async function MakePort(){
         selectTrack.addEventListener('change', async () => {
             selectTimer.innerText = "hi";
             selectChoice = JSON.parse(selectTrack.value);
-            loadSelectTime();
+            SelectTimeLoop();
         });
         
 
@@ -500,6 +474,12 @@ async function MakePort(){
 
         if (port && !beforeclose){
             return;
+        }
+
+        if (db_conn !== undefined){
+            db_conn.close();
+            db_conn = undefined;
+            db = undefined;
         }
         
     });
