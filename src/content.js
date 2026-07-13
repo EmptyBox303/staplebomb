@@ -81,7 +81,6 @@ async function MakePort(){
     var selectTimer;
     var selectChoice = null;
     var selectRequireInit = false;
-    const tsName = "timeSegments";
 
     while(!port_success && attempts < 10){
         try{
@@ -226,13 +225,11 @@ async function MakePort(){
 
             //do a bunch of stuff and set selectTimer, etc
             
-            if(!isFloat){
-                selectTimer.innerText = `Not done yet: ${Date.now()}`;
-            }
-            else{
-                const timeRange = choice.time * 60000;
-
-            }
+            const message = {
+                choice: choice,
+                domain: domain
+            };
+            send(message,port,currentURL);
             
             break;
 
@@ -426,6 +423,12 @@ async function MakePort(){
         ShowTab();
     }
     
+    port.onMessage.addListener((message) => {
+        //console.log(message);
+        //reply contains information about a certain request
+        //we need to make sure the info received is valid 
+    })
+
     port.onDisconnect.addListener((p) => {
         if (p.error){
             console.error(p);

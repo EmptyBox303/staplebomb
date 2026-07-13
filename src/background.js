@@ -51,9 +51,9 @@ var isDBOpen = false;
 function ProcessMessage(message){
     
     if (openDB && isDBOpen){
-        let db = openDB.result;
-        let tx = db.transaction(tsName,"readwrite");
-        let store = tx.objectStore(tsName);
+        const db = openDB.result;
+        const tx = db.transaction(tsName,"readwrite");
+        const store = tx.objectStore(tsName);
         const putreq = store.put(message);
         putreq.onerror = () => {
             console.log("message not stored: ",message);
@@ -61,7 +61,28 @@ function ProcessMessage(message){
         putreq.onsuccess = () =>{
             console.log(`${message.name} at ${message.time/1000} visible? ${message.inView}`);
         }
+        return;
     }
+}
+
+async function PostInfo(message,port){
+    const choice = message.choice;
+    const dom = message.domain;
+
+    const polname = choice.policy.name;
+    if (polname === undefined){
+        console.error("invalid message: ", message);
+        return;
+    }
+
+    port.postMessage({reply: "just making sure things are received"});
+    /* if (polname !== "float"){
+        console.log("not implemented yet, nothing to be done");
+        return;
+    } */
+
+    //this point forward, message valid, polname float
+    //we need to query
 }
 
 
@@ -119,8 +140,13 @@ chrome.runtime.onInstalled.addListener(backgroundStart);
 
 chrome.runtime.onConnect.addListener( (port) => {
     //ProcessMessage(port);
-    port.onMessage.addListener((message) => {
-        ProcessMessage(message);
+    port.onMessage.addListener(async (message) => {
+        if (message.choice === undefined){
+            ProcessMessage(message);
+        }
+        else{
+            PostInfo(message,port);
+        }
     });
 });
 
