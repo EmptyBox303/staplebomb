@@ -45,15 +45,18 @@ async function InjectScripts(){
 }
 
 const tsName = "timeSegments";
+const newTsName = "timeSegs";
+
 var openDB;
 var isDBOpen = false;
+var isLoopActive = false;
 
 function ProcessMessage(message){
     
     if (openDB && isDBOpen){
         const db = openDB.result;
-        const tx = db.transaction(tsName,"readwrite");
-        const store = tx.objectStore(tsName);
+        const tx = db.transaction(newTsName,"readwrite");
+        const store = tx.objectStore(newTsName);
         const putreq = store.put(message);
         putreq.onerror = () => {
             console.log("message not stored: ",message);
@@ -75,14 +78,96 @@ async function PostInfo(message,port){
         return;
     }
 
-    port.postMessage({reply: "just making sure things are received"});
-    /* if (polname !== "float"){
+    //port.postMessage({reply: "just making sure things are received"});
+
+    if (polname !== "float"){
         console.log("not implemented yet, nothing to be done");
         return;
-    } */
+    }
+
+    const minToUnix = choice.time * 60000;
+    const upper = Date.now();
+    const lower = upper - minToUnix;
+    console.log(minToUnix);
+
+    const db = openDB.result;
+    const tx = db.transaction(newTsName,"readonly");
+    const store = tx.objectStore(newTsName);
+    console.log(store.indexNames);
+    const ind = store.index("website");
+    const keyRangeVal = IDBKeyRange.bound([dom,lower],[dom,upper]);
+
+    ind.getAll(keyRangeVal).onsuccess = (event) => {
+        const arr = event.target.result;
+        console.log(arr);
+        let totalTime = 0;
+
+        if (arr.length === 0){
+            const newRangeVal = IDBKeyRange.only([dom,true]);
+            const tryToFindRecord = ind.get(newRangeVal,"prev");
+            tryToFindRecord.onsuccess = (event) => {
+
+                let truetime = (event.target.result.policy === undefined) ? 0 : message.time*60000;
+                port.postMessage({total: totalTime, choice: choice});
+                
+            }
+            //query latest msg that is of domain and visible
+            //if no such msg, return 0 time
+
+            return;
+        }
+
+        let view = true;
+        let startTime = lower;
+        arr.forEach((msg) => {
+            console.log(totalTime);
+            if (msg.inView){
+                view = true;
+                startTime = msg.time;
+            }
+            else if (view){
+                view = false;
+                totalTime += msg.time - startTime;
+            }
+        });
+
+        if (view){
+            view = false;
+            totalTime += upper - startTime;
+        }
+        console.log(totalTime);
+
+        port.postMessage({total: totalTime, choice: choice});
+        
+    }
 
     //this point forward, message valid, polname float
     //we need to query
+    //query: get
+}
+
+async function convertToPackets(){
+    //conceptually what to happen:
+    // take current time
+    //cutoff by the most recently completed minute
+    //get ALL timeSegment entries before this time
+    const nowtime = Date.now();
+    const minute_upperbound = nowtime - (nowtime % 60000);
+    //convert into minute packets
+    //but how?
+    //Find most recently converted minute packet
+    //if no such packet exist, then we convert all ts entries from beginning of time to most recently past minute
+    //if the packet exists, suppose its time is T
+    //it indicates that (supposedly) all msgs from < T + 60000 have been converted to minute packets
+    const ts_destroy_upper = minute_upperbound - 2 * 3600 * 1000;
+    //(effectively) DESTROY all timeSegment entries 2 hours before minute_upperbound;
+
+    //next, cutoff by the most recently completed hour;
+    //get ALL minute packets before this time
+    const hour_upperbound = nowtime - (nowtime % 3600000);
+    //convert into hour packets
+
+    
 }
 
 
@@ -107,29 +192,45 @@ async function backgroundStart(){
             console.error("fatal: database cannot connect after maximum attempts; quitting");
             return;
         }
-        openDB = indexedDB.open("db", 3);
+        openDB = indexedDB.open("db", 11);
 
         openDB.onerror = () => setTimeout(OpenDatabase(i+1),500);
 
-        openDB.onupgradeneeded = () => {
+        openDB.onupgradeneeded = (event) => {
             let db = openDB.result;
-            if(!db.objectStoreNames.contains(tsName)){
-                let obstore = db.createObjectStore(tsName, {keyPath: "time"});
-                obstore.createIndex("website",["name","time"],{unique:false});
 
+            if(db.objectStoreNames.contains(tsName)){
+                db.deleteObjectStore(tsName);
+                console.log(db.objectStoreNames);
                 //obstore.createIndex("isView","isView",{unique:false});
+            }
+            
+            if (!db.objectStoreNames.contains("minute")){
+                let obstore = db.createObjectStore("minute", {keyPath: "time"});
+            }
+            if (!db.objectStoreNames.contains("hour")){
+                let obstore = db.createObjectStore("hour", {keyPath: "time"});
+            }
+            if (!db.objectStoreNames.contains("day")){
+                let obstore = db.createObjectStore("day", {keyPath: "time"});
             }
         };  
 
         openDB.onsuccess = () => {
             let db = openDB.result;
             console.log(db.objectStoreNames);
+            
             isDBOpen = true;
             console.log("DB is open");
         }
     }
 
     OpenDatabase(0);
+
+    if (!isLoopActive){
+        isLoopActive = true;
+        
+    }
     
 }
 

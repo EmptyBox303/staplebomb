@@ -427,6 +427,16 @@ async function MakePort(){
         //console.log(message);
         //reply contains information about a certain request
         //we need to make sure the info received is valid 
+        //the request should be formatted as following:
+        //info: {whatever the fuck info it is}
+        //choice: {choice}
+        //verify choice against select
+
+        /* const choice;
+        if (choice !== selectChoice) return; */
+
+        //TODO: here
+        
     })
 
     port.onDisconnect.addListener((p) => {
