@@ -17,7 +17,7 @@ async function AsyncLoop(action_fn,condition_fn, interval = 10){
     }
 }
 
-function MakeHiddenUntilHover(divToHover,divToHide){
+function MakeHiddenUntilHover(divToHover,divToHide,disp = 'block'){
     divToHide.style.display = 'none';
     divToHover.addEventListener('mouseenter',() => {
         let s = divToHover.parentElement.className;
@@ -25,7 +25,7 @@ function MakeHiddenUntilHover(divToHover,divToHide){
             divToHide.style.display = 'none';
         }
         else{
-            divToHide.style.display = 'block';
+            divToHide.style.display = disp;
         }
         
     });
@@ -51,9 +51,9 @@ async function MakePort(){
     const trackingModes = [
         new MonitorTime(15,"15 minutes",PrecisionPolicies.FLOATING),
         new MonitorTime(30,"half hour",PrecisionPolicies.FLOATING),
-        new MonitorTime(60,"hour",PrecisionPolicies.MINUTE),
+        new MonitorTime(60,"hour",PrecisionPolicies.FLOATING),
         new MonitorTime(120,"2 hours",PrecisionPolicies.MINUTE),
-        new MonitorTime(360,"6 hours",PrecisionPolicies.HOUR),
+        new MonitorTime(360,"6 hours",PrecisionPolicies.MINUTE),
         new MonitorTime(1440, "day", PrecisionPolicies.HOUR),
         new MonitorTime(2880, "2 days", PrecisionPolicies.HOUR),
         new MonitorTime(7*1440, "week", PrecisionPolicies.DAY),
@@ -79,6 +79,8 @@ async function MakePort(){
     var sessionStart;
     var selectTrack;
     var selectTimer;
+    var selectHide;
+    var selectInner;
     var selectChoice = null;
     var selectRequireInit = false;
 
@@ -183,7 +185,7 @@ async function MakePort(){
         stopwatchPause = false;
         updateLoop();
         if(selectRequireInit){
-            //reinit loop
+            SelectTimeLoop();
         }
         aggregateRecord = true;
         
@@ -213,12 +215,11 @@ async function MakePort(){
         if (choice === null){
             selectTimer.innerText = "";
         }
-        selectTimer.innerText = `Loading past ${choice.name}`;
-        selectTimer.innerText = 'Done!';
+        selectTimer.innerText = `Loading...`;
 
         const dbload = choice.policy.name;
         const isFloat = (dbload === "float");
-        const loopInterval = (isFloat) ? 5000 : choice.policy.unit;
+        const loopInterval = (isFloat) ? 1000 : choice.policy.unit;
 
 
         while(selectChoice === choice){
@@ -230,8 +231,6 @@ async function MakePort(){
                 domain: domain
             };
             send(message,port,currentURL);
-            
-            break;
 
             await new Promise ((resolve) => setTimeout(resolve,loopInterval));
 
@@ -322,6 +321,37 @@ async function MakePort(){
             selectTimer.style = `
                 margin-left: 8pt;
             `;
+
+            selectHide = document.createElement("span");
+            MakeHiddenUntilHover(selectTimer,selectHide,'inline');
+            selectdiv.appendChild(selectHide);
+
+            selectBar = document.createElement("div");
+            selectBar.style = `
+                margin:auto;
+                margin-top: 4pt;
+                background-color: rgba(230, 230, 230, 1);
+                z-axis: 1000008;
+                width: 90%;
+                text-align: center;
+                box-sizing: border-box;
+                height: 0pt;
+            `;
+
+            selectdiv.appendChild(selectBar);
+
+            selectInner = document.createElement("div");
+            selectBar.appendChild(selectInner);
+            selectInner.style = `
+                position:relative;
+                height: 100%;
+                width: 0%;
+                left: 0px;
+                top: 0px;
+                background-color: rgba(37, 150, 190, 1);
+                z-axis: 1000009;
+            `
+
             div.appendChild(selectdiv);
             
             let defop = document.createElement("option");
@@ -432,9 +462,20 @@ async function MakePort(){
         //choice: {choice}
         //verify choice against select
 
-        /* const choice;
-        if (choice !== selectChoice) return; */
+        const choice = message.choice;
+        //console.log(choice);
+        if (choice.time != selectChoice.time){
+            console.log("difference");
+        }
 
+        //const total = message.total;
+        const interval = choice.time*60000;
+        selectTimer.innerText = GetStopwatchTime(message.total).slice(0,-4);
+        selectHide.innerText = " since " + UNIXtoDate(Date.now() - interval);
+        selectBar.style.height = "12pt";
+        const percent = 100 * message.total / interval;
+        selectInner.style.width = `${percent}%`;
+        selectInner.innerText = `${Math.round(100 * percent)/100}%`;
         //TODO: here
         
     })
