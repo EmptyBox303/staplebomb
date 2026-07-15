@@ -44,6 +44,12 @@ async function InjectScripts(){
     
 }
 
+function TrueSegment(start,end,domain){
+    this.start = start;
+    this.end = end;
+    this.domain = domain;
+}
+
 const tsName = "timeSegments";
 const newTsName = "timeSegs";
 
@@ -147,25 +153,69 @@ async function PostInfo(message,port){
 }
 
 async function convertToPackets(){
-    //conceptually what to happen:
-    // take current time
-    //cutoff by the most recently completed minute
-    //get ALL timeSegment entries before this time
     const nowtime = Date.now();
     const minute_upperbound = nowtime - (nowtime % 60000);
-    //convert into minute packets
-    //but how?
-    //Find most recently converted minute packet
-    //if no such packet exist, then we convert all ts entries from beginning of time to most recently past minute
-    //if the packet exists, suppose its time is T
-    //it indicates that (supposedly) all msgs from < T + 60000 have been converted to minute packets
-    const ts_destroy_upper = minute_upperbound - 2 * 3600 * 1000;
-    //(effectively) DESTROY all timeSegment entries 2 hours before minute_upperbound;
+    //goal rn: simply convert existing time entries up to most recently completed minute;
+    //try to find most recent  minute packet
+    const db = openDB.result;
+    const tx = db.transaction([newTsName,"minute"],"readwrite");
+    const minuteStore = tx.objectStore("minute");
+    const minuteIndex = minuteStore.index("time");
+    minuteIndex.openCursor(null,"prev").onsuccess = (event) => {
+        const cursor = event.target.result;
+        
+        let lowerbound = (cursor === null) ? 0 : (cursor.value.time + 60000);
+        console.log(lowerbound);
+        let upperbound = minute_upperbound;
+        const tsQueryRange = IDBKeyRange.bound(lowerbound,upperbound);
+        
+        const tsStore = tx.objectStore(newTsName);
+        const tsIndex = tsStore.index("time");
 
-    //next, cutoff by the most recently completed hour;
-    //get ALL minute packets before this time
-    const hour_upperbound = nowtime - (nowtime % 3600000);
-    //convert into hour packets
+        tsIndex.getAll(tsQueryRange).onsuccess = (event) => {
+            const arr = event.target.result;
+            console.log(arr);
+            //this gives us the range of messages
+            if (event.target.result === null){
+                return;
+            }
+
+            
+            const firstTime = arr[0].time;
+            const startTime = (lowerbound === 0) ? (firstTime - firstTime % 60000) : lowerbound;
+
+           
+            if (arr.length === 0) return;
+            let trueTimeSegments = [];
+            let lastEntry = arr[0];
+            if(!lastEntry.inView){
+                trueTimeSegments.push(new TrueSegment(startTime,lastEntry.time,lastEntry.name));
+                currTime = lastEntry.time;
+            }
+            for(let i = 1; i < arr.length; i++){
+                const currEntry = arr[i];
+                //a new TrueSegment only ever needs creation if lastEntry is a SHOW event
+                //two cases of creation: 
+                //if currEntry has different domain(interruption)
+                //or if domain matches and currEntry is a matching HIDE
+                
+                if (lastEntry.inView && 
+                    ((lastEntry.name !== currEntry.name) || 
+                    (lastEntry.name === currEntry.name && !currEntry.inView))
+                ){
+                    trueTimeSegments.push(new TrueSegment(lastEntry.time,currEntry.time,lastEntry.name));
+                }
+                lastEntry = currEntry;
+            }
+            if (lastEntry.inView){
+                trueTimeSegments.push(new TrueSegment(lastEntry.time,upperbound,lastEntry.name));
+            }
+
+            //we now have a complete list of trueTimeSegments
+            
+        }
+        
+    };
 
     
 }
@@ -192,27 +242,32 @@ async function backgroundStart(){
             console.error("fatal: database cannot connect after maximum attempts; quitting");
             return;
         }
-        openDB = indexedDB.open("db", 11);
+        openDB = indexedDB.open("db", 14);
 
         openDB.onerror = () => setTimeout(OpenDatabase(i+1),500);
 
         openDB.onupgradeneeded = (event) => {
             let db = openDB.result;
 
-            if(db.objectStoreNames.contains(tsName)){
-                db.deleteObjectStore(tsName);
-                console.log(db.objectStoreNames);
-                //obstore.createIndex("isView","isView",{unique:false});
-            }
+            /* if(db.objectStoreNames.contains(newTsName)){
+                let obstore = event.target.transaction.objectStore(newTsName);
+                obstore.createIndex("time","time",{unique:false});
+            } */
             
-            if (!db.objectStoreNames.contains("minute")){
-                let obstore = db.createObjectStore("minute", {keyPath: "time"});
+            if (db.objectStoreNames.contains("minute")){
+                db.deleteObjectStore("minute");
+                let obstore = db.createObjectStore("minute",{autoIncrement: true});
+                obstore.createIndex("time","time",{unique:false});
             }
-            if (!db.objectStoreNames.contains("hour")){
-                let obstore = db.createObjectStore("hour", {keyPath: "time"});
+            if (db.objectStoreNames.contains("hour")){
+                db.deleteObjectStore("hour");
+                let obstore = db.createObjectStore("hour",{autoIncrement: true});
+                obstore.createIndex("time","time",{unique:false});
             }
-            if (!db.objectStoreNames.contains("day")){
-                let obstore = db.createObjectStore("day", {keyPath: "time"});
+            if (db.objectStoreNames.contains("day")){
+                db.deleteObjectStore("day");
+                let obstore = db.createObjectStore("day",{autoIncrement: true});
+                obstore.createIndex("time","time",{unique:false});
             }
         };  
 
@@ -222,7 +277,10 @@ async function backgroundStart(){
             
             isDBOpen = true;
             console.log("DB is open");
+            convertToPackets();
         }
+
+
     }
 
     OpenDatabase(0);
