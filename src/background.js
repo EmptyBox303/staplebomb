@@ -161,58 +161,138 @@ async function convertToPackets(){
     const tx = db.transaction([newTsName,"minute"],"readwrite");
     const minuteStore = tx.objectStore("minute");
     const minuteIndex = minuteStore.index("time");
-    minuteIndex.openCursor(null,"prev").onsuccess = (event) => {
+    minuteIndex.openCursor(null,"prev").onsuccess = async (event) => {
         const cursor = event.target.result;
-        
-        let lowerbound = (cursor === null) ? 0 : (cursor.value.time + 60000);
-        console.log(lowerbound);
+        console.log("Upper: ", minute_upperbound);
+
+        let lowerbound = (cursor === null) ? 0 : Number(cursor.value.time) + 60000;
+        console.log(typeof cursor.value.time);
         let upperbound = minute_upperbound;
         const tsQueryRange = IDBKeyRange.bound(lowerbound,upperbound);
         
         const tsStore = tx.objectStore(newTsName);
         const tsIndex = tsStore.index("time");
 
-        tsIndex.getAll(tsQueryRange).onsuccess = (event) => {
-            const arr = event.target.result;
-            console.log(arr);
-            //this gives us the range of messages
-            if (event.target.result === null){
-                return;
-            }
-
-            
-            const firstTime = arr[0].time;
-            const startTime = (lowerbound === 0) ? (firstTime - firstTime % 60000) : lowerbound;
-
-           
-            if (arr.length === 0) return;
-            let trueTimeSegments = [];
-            let lastEntry = arr[0];
-            if(!lastEntry.inView){
-                trueTimeSegments.push(new TrueSegment(startTime,lastEntry.time,lastEntry.name));
-                currTime = lastEntry.time;
-            }
-            for(let i = 1; i < arr.length; i++){
-                const currEntry = arr[i];
-                //a new TrueSegment only ever needs creation if lastEntry is a SHOW event
-                //two cases of creation: 
-                //if currEntry has different domain(interruption)
-                //or if domain matches and currEntry is a matching HIDE
-                
-                if (lastEntry.inView && 
-                    ((lastEntry.name !== currEntry.name) || 
-                    (lastEntry.name === currEntry.name && !currEntry.inView))
-                ){
-                    trueTimeSegments.push(new TrueSegment(lastEntry.time,currEntry.time,lastEntry.name));
+        tsIndex.getAll(tsQueryRange).onsuccess = async (event) => {
+            let convertFunc = async () => {
+                const arr = event.target.result;
+                console.log(arr);
+                //this gives us the range of messages
+                if (event.target.result.length === 0){
+                    return;
                 }
-                lastEntry = currEntry;
-            }
-            if (lastEntry.inView){
-                trueTimeSegments.push(new TrueSegment(lastEntry.time,upperbound,lastEntry.name));
+
+                
+                const firstTime = arr[0].time;
+                const startTime = (lowerbound === 0) ? (firstTime - firstTime % 60000) : lowerbound;
+
+            
+                if (arr.length === 0) return;
+                let trueTimeSegments = [];
+                let lastEntry = arr[0];
+                if(!lastEntry.inView){
+                    trueTimeSegments.push(new TrueSegment(startTime,lastEntry.time,lastEntry.name));
+                }
+                for(let i = 1; i < arr.length; i++){
+                    const currEntry = arr[i];
+                    //a new TrueSegment only ever needs creation if lastEntry is a SHOW event
+                    //two cases of creation: 
+                    //if currEntry has different domain(interruption)
+                    //or if domain matches and currEntry is a matching HIDE
+                    
+                    if (lastEntry.inView && 
+                        ((lastEntry.name !== currEntry.name) || 
+                        (lastEntry.name === currEntry.name && !currEntry.inView))
+                    ){
+                        trueTimeSegments.push(new TrueSegment(lastEntry.time,currEntry.time,lastEntry.name));
+                    }
+                    lastEntry = currEntry;
+                }
+                if (lastEntry.inView){
+                    trueTimeSegments.push(new TrueSegment(lastEntry.time,upperbound,lastEntry.name));
+                    tsStore.add({name: lastEntry.name, time: upperbound, inView: true, action: "GEN"});
+                }
+
+                //we now have a complete list of trueTimeSegments
+                //iterate through them to create minute packets
+                const l = trueTimeSegments.length;
+                let minutePackets = {};
+                for (let i = 0; i < l; i++){
+                    
+                    const currSeg = trueTimeSegments[i];
+                    const currDomain = currSeg.domain;
+                    //we look at the start and end times of this segment
+                    const startSpan = currSeg.start - currSeg.start % 60000;
+                    const endSpan = (currSeg.end - 1) - (currSeg.end - 1) % 60000 + 60000;
+                    if (startSpan === endSpan){
+                        //do nothing
+                    }
+                    else if (startSpan + 60000 === endSpan){
+                        if (!(startSpan in minutePackets)){
+                            minutePackets[startSpan] = {};
+                            
+                        }
+                        if (currDomain in minutePackets[startSpan]){
+                            minutePackets[startSpan][currDomain] += currSeg.end - currSeg.start;
+                        }
+                        else{
+                            minutePackets[startSpan][currDomain] = currSeg.end - currSeg.start;
+                        }
+                    
+                    }else for(let t = startSpan; t < endSpan; t += 60000){
+                        const t_end = t + 60000;
+                        if (!(t in minutePackets)){
+                            minutePackets[t] = {};
+                        }
+
+                        //1. currSeg starts within this minutePackete but doesn't end in it
+                        if (currSeg.start < t_end){
+                            if (!(currDomain in minutePackets[t])){
+                                minutePackets[t][currDomain] = t_end - currSeg.start;
+                            }
+                            else minutePackets[t][currDomain] += t_end - currSeg.start;
+                        }
+                        //2. currSeg starts before this minute packet and ends outside
+                        else if (currSeg.end > t_end){
+                            if (!(currDomain in minutePackets[t])){
+                                minutePackets[t][currDomain] = 60000;
+                            }
+                            else minutePackets[t][currDomain] += 60000;
+                        }
+                        else{
+                            if (!(currDomain in minutePackets[t])){
+                                minutePackets[t][currDomain] = currSeg.end - t;
+                            }
+                            else minutePackets[t][currDomain] += currSeg.end - t;
+                        }
+                    }
+
+                }
+
+                for(const [key,value] of Object.entries(minutePackets)){
+                    minuteStore.add({time:Number(key), dict: value});
+                }
+                return;
+            
+
             }
 
-            //we now have a complete list of trueTimeSegments
-            
+            await convertFunc();
+            const deleteUpperBound = minute_upperbound - 2 * 3600 * 1000;
+            console.log("deleting all ts entries before ", new Date(deleteUpperBound).toLocaleString());
+            console.log(deleteUpperBound);
+            tsIndex.openCursor(IDBKeyRange.upperBound(deleteUpperBound)).onsuccess = (event) => {
+                let count = 0;
+                const cursor = event.target.result;
+                if (cursor){
+                    cursor.delete();
+                    count++;
+                    cursor.continue();
+                }
+                else{
+                    console.log(`${count} deleted\n`);
+                }
+            }
         }
         
     };
