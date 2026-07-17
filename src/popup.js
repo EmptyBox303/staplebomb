@@ -9,4 +9,8 @@ resetButton.onclick = () =>{
             console.log("clear success");
         }
     });
+
+    chrome.runtime.sendMessage({
+        clearRequest: true
+    });
 };
