@@ -463,6 +463,7 @@ async function MakePort(){
         //verify choice against select
 
         const choice = message.choice;
+        //console.log("hi");
         //console.log(choice);
         if (choice.time != selectChoice.time){
             console.log("difference");
@@ -471,7 +472,82 @@ async function MakePort(){
         //const total = message.total;
         const interval = choice.time*60000;
         selectTimer.innerText = GetStopwatchTime(message.total).slice(0,-4);
-        selectHide.innerText = " since " + UNIXtoDate(Date.now() - interval);
+        if (choice.policy.name === "float"){
+            const floatstr = UNIXtoDate(Date.now() - interval);
+            const commaIndex = floatstr.indexOf(",");
+            selectHide.innerText = " since " + floatstr.slice(commaIndex+1);
+        }
+        else{
+            const dayConvert = (s) => {
+                let ind = s.indexOf(",");
+                //show only the date
+                return s.slice(0,ind);
+            }
+
+            const hourConvert = (s) => {
+                
+                let slash_sep = s.split("/"); //--> [0]mm, [1]dd, [2] yyyy,
+                let finalstring = slash_sep[0] + "/" + slash_sep[1] + " ";
+
+                let commaInd = slash_sep[2].indexOf(",");
+                let timeOfDay = slash_sep[2].slice(commaInd+1);
+
+                let colon_sep = timeOfDay.split(":");
+                finalstring += colon_sep[0];
+                finalstring += colon_sep[2].slice(-2);
+
+                //show month, day, and hour, with pm/am;
+
+                //xx/xx/xxxx, xx:xx:xx mm
+                return finalstring;
+            }
+
+            const  minuteConvert = (s) => {
+                //show hour and minute
+
+                let ind = s.indexOf(",");
+                let timeOfDay = s.slice(ind+2);
+                //xx:xx:xx pm
+
+                let colon_sep = timeOfDay.split(":");
+                return colon_sep[0] + ":" + colon_sep[1] + " " + colon_sep[2].slice(-2);
+            }
+
+
+            const delay = choice.policy.unit;
+            const upper = Date.now() - (Date.now() % delay);
+            const lower = upper - interval;
+
+            let upperString = UNIXtoDate(upper);
+            let lowerString = UNIXtoDate(lower);
+
+            let processF;
+            switch (choice.policy.name){
+                case "minute":
+                    processF = minuteConvert;
+                    break;
+                case "hour":
+                    processF = hourConvert;
+                    break;
+                case "day":
+                    processF = dayConvert;
+                    break;
+                default:
+                    console.error("choice has invalid policy ", choice.policy.name);
+                    break;
+            }
+
+            let lfinal = processF(lowerString);
+            let ufinal = processF(upperString);
+
+            
+
+            
+            
+
+            selectHide.innerText = ` from ${lfinal} to ${ufinal}`;
+            //for minute, it's to the last finished minute
+        }
         selectBar.style.height = "12pt";
         const percent = 100 * message.total / interval;
         selectInner.style.width = `${percent}%`;

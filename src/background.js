@@ -101,7 +101,6 @@ async function PostInfo(message,port){
         const minToUnix = choice.time * 60000;
         const upper = Date.now();
         const lower = upper - minToUnix;
-        console.log(minToUnix);
 
         const db = openDB.result;
         const tx = db.transaction(newTsName,"readonly");
@@ -157,7 +156,38 @@ async function PostInfo(message,port){
 
     
     if (polname !== "float"){
-        console.log("not implemented yet, nothing to be done");
+        const minToUnix = choice.time * 60000;
+        const policy = choice.policy;
+        const upper = Date.now() - Date.now() % Number(policy.unit);
+        const lower = upper - minToUnix;
+        const timeRange = IDBKeyRange.bound(lower,upper, false, true);
+        //we want 
+
+        const db = openDB.result;
+        const tx = db.transaction(polname, "readonly");
+
+        const store = tx.objectStore(polname);
+        const storeIndex = store.index("time");
+
+        storeIndex.getAll(timeRange).onsuccess = (event) => {
+            const arr = event.target.result;
+            let totalTime = 0;
+
+            if (arr.length === 0){
+                port.postMessage({total: totalTime, choice: choice});
+                return;
+            }
+            const l = arr.length;
+            for(let i = 0; i < l; i++){
+                if (dom in arr[i].dict){
+                    totalTime += arr[i].dict[dom];
+                }
+            }
+
+            port.postMessage({total: totalTime, choice: choice});
+            return;
+
+        };
     }
     else{
         PostFloat();
@@ -180,7 +210,95 @@ async function convertToPackets(){
     const minuteIndex = minuteStore.index("time");
 
 
-    
+    let dayset = async () => {
+        const day_upperbound = nowtime - (nowtime % 24 * 3600000);
+        console.log((new Date(day_upperbound)).toLocaleString());
+
+
+        const tx_hour = db.transaction(["hour","day"],"readwrite");
+        const dayStore = tx_hour.objectStore("day");
+        const dayIndex = dayStore.index("time");
+        const hrStore = tx_hour.objectStore("hour");
+        const hrIndex = hrStore.index("time");
+
+        dayIndex.openCursor(null,"prev").onsuccess = (event) => {
+            const cursor = event.target.result;
+            const day_lowerbound = (cursor === null) ? 0 : (Number(cursor.value.time) + 24 * 3600000);
+
+            const hourDeletion = () => {
+                console.log("hourDeletion");
+                const hour_delete_upper = day_upperbound - (7 * 24 * 3600 * 1000);
+                    console.log((new Date(hour_delete_upper)).toLocaleString());
+
+                const deleteHourRange = IDBKeyRange.upperBound(hour_delete_upper);
+                
+                hrIndex.openCursor(deleteHourRange).onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    let count = 0;
+                    if (cursor){
+                        cursor.delete();
+                        cursor.continue();
+                    }
+                    else{
+                        console.log(`${count} deleted from minute db`);
+                        hrIndex.getAll().onsuccess = (event) => {
+                            const arr = event.target.result;
+                            console.log(arr);
+                        }
+                    }
+                }
+            };
+            if (day_lowerbound >= day_upperbound){
+                hourDeletion();
+                return;
+            }
+           
+            const targetHourRange = IDBKeyRange.bound(day_lowerbound,day_upperbound);
+
+            hrIndex.getAll(targetHourRange).onsuccess = (event) => {
+
+                const hourArr = event.target.result;
+                console.log(hourArr.length);
+                if (hourArr.length === 0){
+                    hourDeletion();
+                    return;
+                    //no conversion; go to minute deletion
+                }
+
+                let hourPackets = {};
+                for(let i = 0; i < hourArr.length; i++){
+                    const hourP = hourArr[i];
+                    
+                    //each minute maps to some hour
+                    const hourTime = Number(hourP.time);
+                    const dayMap = hourTime - (hourTime % 24 * 3600000);
+
+                    if (!(dayMap in hourPackets)){
+                        dayPackets[dayMap] = {};
+                        for (const [domain,time] in Object.entries(hourP.dict)){
+                            //each is a domain name and time usage
+                            if (!(domain in hourPackets[hourMap])){
+                                dayPackets[dayMap][domain] = Number(time);
+                            }
+                            else{
+                                dayPackets[dayMap][domain] += Number(time);
+                            }
+                        }
+                    }
+
+                    
+                }
+
+                for(const [day,content] in dayPackets){
+                    dayStore.add({time:day, dict: content});
+                }
+                hourDeletion();
+                return;
+                //all work doen now; go to hour deletion
+            }
+        }
+        
+    }
 
     let hourset = async () => {
         console.log("this is hourset");
@@ -216,10 +334,8 @@ async function convertToPackets(){
                     }
                     else{
                         console.log(`${count} deleted from minute db`);
-                        minIndex.getAll().onsuccess = (event) => {
-                            const arr = event.target.result;
-                            console.log(arr);
-                        }
+                        dayset();
+
                     }
                 }
             };
@@ -293,7 +409,7 @@ async function convertToPackets(){
                 console.log(event.target.result);
             }
 
-            tsIndex.getAll(/* tsQueryRange */).onsuccess = async (event) => {
+            tsIndex.getAll(tsQueryRange).onsuccess = async (event) => {
                 let convertFunc = async () => {
                     const arr = event.target.result;
                     console.log(arr);
@@ -400,8 +516,8 @@ async function convertToPackets(){
                     }
 
                     for(const [key,value] of Object.entries(minutePackets)){
-                        //minuteStore.add({time:Number(key), dict: value});
-                        console.log(`${key}:`,value);
+                        minuteStore.add({time:Number(key), dict: value});
+                        //console.log(`${key}:`,value);
                     }
                     return;
                 
@@ -409,10 +525,15 @@ async function convertToPackets(){
                 }
 
                 await convertFunc();
-                /* const deleteUpperBound = minute_upperbound - 2 * 3600 * 1000;
+                const deleteUpperBound = minute_upperbound - 2 * 3600 * 1000;
+                const deleteRange = IDBKeyRange.upperBound(deleteUpperBound);
                 console.log("deleting all ts entries before ", new Date(deleteUpperBound).toLocaleString());
                 console.log(deleteUpperBound);
-                tsIndex.openCursor(IDBKeyRange.upperBound(deleteUpperBound)).onsuccess = (event) => {
+
+                tsIndex.getAll(deleteRange).onsuccess = (event) => {
+                    console.log(event.target.result);
+                }
+                tsIndex.openCursor(deleteRange).onsuccess = (event) => {
                     let count = 0;
                     const cursor = event.target.result;
                     if (cursor){
@@ -424,7 +545,7 @@ async function convertToPackets(){
                         console.log(`${count} deleted\n`);
                     }
                 }
-                hourset(); */
+                hourset();
             }
             
         };
