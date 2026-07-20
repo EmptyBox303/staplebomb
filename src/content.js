@@ -219,7 +219,7 @@ async function MakePort(){
 
         const dbload = choice.policy.name;
         const isFloat = (dbload === "float");
-        const loopInterval = (isFloat) ? 1000 : choice.policy.unit;
+        const loopInterval = (isFloat) ? 1000 : 15000;
 
 
         while(selectChoice === choice){
