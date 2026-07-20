@@ -467,6 +467,7 @@ async function MakePort(){
         //console.log(choice);
         if (choice.time != selectChoice.time){
             console.log("difference");
+            
         }
 
         //const total = message.total;
