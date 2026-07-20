@@ -170,7 +170,9 @@ async function PostInfo(message,port){
         const storeIndex = store.index("time");
 
         storeIndex.getAll(timeRange).onsuccess = (event) => {
+            //console.log(`retrieved entries for ${polname}:`);
             const arr = event.target.result;
+            //console.log(arr);
             let totalTime = 0;
 
             if (arr.length === 0){
@@ -399,6 +401,7 @@ async function convertToPackets(){
     }
 
     const minuteset = async () => {
+        console.log("this is minuteset");
         const tx = db.transaction([newTsName,"minute"],"readwrite");
         const minuteStore = tx.objectStore("minute");
         const minuteIndex = minuteStore.index("time");
@@ -414,10 +417,6 @@ async function convertToPackets(){
             
             const tsStore = tx.objectStore(newTsName);
             const tsIndex = tsStore.index("time");
-
-            /*           tsIndex.getAll().onsuccess = (event) => {
-                console.log(event.target.result);
-            } */
 
             tsIndex.getAll(tsQueryRange).onsuccess = async (event) => {
                 let convertFunc = async () => {
@@ -524,6 +523,7 @@ async function convertToPackets(){
 
                     }
 
+
                     for(const [key,value] of Object.entries(minutePackets)){
                         minuteStore.add({time:Number(key), dict: value});
                         //console.log(`${key}:`,value);
@@ -536,6 +536,7 @@ async function convertToPackets(){
                 await convertFunc();
                 const deleteUpperBound = minute_upperbound - 2 * 3600 * 1000;
                 const deleteRange = IDBKeyRange.upperBound(deleteUpperBound);
+
                 //console.log("deleting all ts entries before ", new Date(deleteUpperBound).toLocaleString());
                 //console.log(deleteUpperBound);
 
