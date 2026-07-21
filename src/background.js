@@ -202,8 +202,7 @@ async function PostInfo(message,port){
 }
 
 async function convertToPackets(){
-    const nowtime = Date.now();
-    const minute_upperbound = nowtime - (nowtime % 60000);
+    
     //goal rn: simply convert existing time entries up to most recently completed minute;
     //try to find most recent  minute packet
     const db = openDB.result;
@@ -211,8 +210,9 @@ async function convertToPackets(){
 
 
     const dayset = async () => {
-        console.log("dayset start");
+        const nowtime = Date.now();
         const day_upperbound = nowtime - (nowtime % 24 * 3600000);
+        console.log("dayset start");
         console.log(`reviewing hour packets up to ${(new Date(day_upperbound)).toLocaleString()}`);
 
         const tx_hour = db.transaction(["hour","day"],"readwrite");
@@ -302,6 +302,7 @@ async function convertToPackets(){
 
     const hourset = async () => {
         console.log("this is hourset");
+        const nowtime = Date.now();
         const hour_upperbound = nowtime - (nowtime % 3600000);
         console.log((new Date(hour_upperbound)).toLocaleString());
 
@@ -402,17 +403,21 @@ async function convertToPackets(){
 
     const minuteset = async () => {
         console.log("this is minuteset");
+        const nowtime = Date.now();
+        const minute_upperbound = nowtime - (nowtime % 60000);
         const tx = db.transaction([newTsName,"minute"],"readwrite");
         const minuteStore = tx.objectStore("minute");
         const minuteIndex = minuteStore.index("time");
         
         minuteIndex.openCursor(null,"prev").onsuccess = async (event) => {
+            console.log("opening minuteindex");
             const cursor = event.target.result;
             //console.log("Upper: ", minute_upperbound);
 
             let lowerbound = (cursor === null) ? 0 : Number(cursor.value.time) + 60000;
             //console.log(typeof cursor.value.time);
             let upperbound = minute_upperbound;
+            console.log(`getting messages from ${new Date(lowerbound).toLocaleString()} to ${new Date(upperbound).toLocaleString()}`);
             const tsQueryRange = IDBKeyRange.bound(lowerbound,upperbound);
             
             const tsStore = tx.objectStore(newTsName);
@@ -420,17 +425,17 @@ async function convertToPackets(){
 
             tsIndex.getAll(tsQueryRange).onsuccess = async (event) => {
                 let convertFunc = async () => {
+                    console.log("range of messages to convert:");
                     const arr = event.target.result;
+                    console.log(arr);
                     //this gives us the range of messages
                     if (event.target.result.length === 0){
                         return;
                     }
-
                     
                     const firstTime = arr[0].time;
                     const startTime = (lowerbound === 0) ? (firstTime - firstTime % 60000) : lowerbound;
 
-                
                     if (arr.length === 0) return;
                     let trueTimeSegments = [];
                     let lastEntry = arr[0];
