@@ -6,7 +6,34 @@
     <title>Popup</title>
 </head>
 <body>
-    <button id = "resetButton">Reset</button>
-    <script src = "src/popup.js"></script>
+    <div style = "width: 200px; display: inline-block; font-size: 10pt;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+        <span>Select data/storage to be cleared:</span><br>
+        <form>
+            <input type="checkbox" id="session">
+            <label for="session">Session data</label>
+            <br>
+            <input type="checkbox" id="continuous">
+            <label for="continuous">Continuous tracking</label>
+            <br>
+
+            <input type="checkbox" id="minute">
+            <label for="minute">Minute packets</label>
+            <br>
+
+            <input type="checkbox" id="hour">
+            <label for="hour">Hour packets</label>
+            <br>
+
+            <input type="checkbox" id="day">
+            <label for="day">Day packets</label>
+            <br>
+        </form>
+        
+        <br>
+        <button id = "resetButton">Reset</button>
+        <script src = "src/popup.js"></script>
+    </div>
+    
 </body>
 </html>
