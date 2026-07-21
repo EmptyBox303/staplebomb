@@ -601,33 +601,22 @@ async function backgroundStart(){
             console.error("fatal: database cannot connect after maximum attempts; quitting");
             return;
         }
-        openDB = indexedDB.open("db", 14);
+        openDB = indexedDB.open("db", 15);
 
         openDB.onerror = () => setTimeout(OpenDatabase(i+1),500);
 
         openDB.onupgradeneeded = (event) => {
             let db = openDB.result;
-
+            if(!db.objectStoreNames.contains("settings")){
+                db.createObjectStore("settings");
+            }
+            
             /* if(db.objectStoreNames.contains(newTsName)){
                 let obstore = event.target.transaction.objectStore(newTsName);
                 obstore.createIndex("time","time",{unique:false});
             } */
             
-            if (db.objectStoreNames.contains("minute")){
-                db.deleteObjectStore("minute");
-                let obstore = db.createObjectStore("minute",{autoIncrement: true});
-                obstore.createIndex("time","time",{unique:false});
-            }
-            if (db.objectStoreNames.contains("hour")){
-                db.deleteObjectStore("hour");
-                let obstore = db.createObjectStore("hour",{autoIncrement: true});
-                obstore.createIndex("time","time",{unique:false});
-            }
-            if (db.objectStoreNames.contains("day")){
-                db.deleteObjectStore("day");
-                let obstore = db.createObjectStore("day",{autoIncrement: true});
-                obstore.createIndex("time","time",{unique:false});
-            }
+            
         };  
 
         openDB.onsuccess = () => {
