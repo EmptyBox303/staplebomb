@@ -542,18 +542,23 @@ async function convertToPackets(){
                 const deleteUpperBound = minute_upperbound - 2 * 3600 * 1000;
                 const deleteRange = IDBKeyRange.upperBound(deleteUpperBound);
 
-                //console.log("deleting all ts entries before ", new Date(deleteUpperBound).toLocaleString());
-                //console.log(deleteUpperBound);
+                console.log("deleting all ts entries before ", new Date(deleteUpperBound).toLocaleString());
+                console.log(deleteUpperBound);
 
-                tsIndex.openCursor(deleteRange).onsuccess = (event) => {
-                    let count = 0;
-                    const cursor = event.target.result;
-                    if (cursor){
-                        cursor.delete();
-                        count++;
-                        cursor.continue();
+                tsIndex.getAll(deleteRange).onsuccess = (event) => {
+                    console.log("entries to be deleted:");
+                    console.log(event.target.result);
+                    tsIndex.openCursor(deleteRange).onsuccess = (event) => {
+                        let count = 0;
+                        const cursor = event.target.result;
+                        if (cursor){
+                            cursor.delete();
+                            count++;
+                            cursor.continue();
+                        }
                     }
                 }
+                
             }
             
         };
