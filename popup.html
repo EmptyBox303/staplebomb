@@ -6,36 +6,41 @@
     <title>Popup</title>
 </head>
 <body>
-    <div style = "width: 200px; display: inline-block; font-size: 10pt;
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
-        <span>Select data/storage to be cleared:</span><br>
-        <form>
-            <input type="checkbox" id="session">
-            <label for="session">Session data</label>
+    <div style = "width: 200px; font-size: 10pt;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+        <div id = "showing" style = "display: none; ">
+            <span>Select data/storage to be cleared:</span><br>
+            <form>
+                <input type="checkbox" id="session">
+                <label for="session">Session data</label>
+                <br>
+                <input type="checkbox" id="continuous">
+                <label for="continuous">Continuous tracking</label>
+                <br>
+    
+                <input type="checkbox" id="minute">
+                <label for="minute">Minute packets</label>
+                <br>
+    
+                <input type="checkbox" id="hour">
+                <label for="hour">Hour packets</label>
+                <br>
+    
+                <input type="checkbox" id="day">
+                <label for="day">Day packets</label>
+                <br>
+            </form>
+            
             <br>
-            <input type="checkbox" id="continuous">
-            <label for="continuous">Continuous tracking</label>
+            <button id = "resetButton">Reset</button>
             <br>
-
-            <input type="checkbox" id="minute">
-            <label for="minute">Minute packets</label>
-            <br>
-
-            <input type="checkbox" id="hour">
-            <label for="hour">Hour packets</label>
-            <br>
-
-            <input type="checkbox" id="day">
-            <label for="day">Day packets</label>
-            <br>
-        </form>
-        
-        <br>
-        <button id = "resetButton">Reset</button>
-        <br>
-        <span id = "display"></span>
-
-        <script src = "src/popup.js"></script>
+            <span id = "display"></span>
+    
+            <script src = "src/popup.js"></script>
+    
+        </div>
+        <span id = "hiding">Loading...</span>
+        <hr><br>
 
     </div>
     

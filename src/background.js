@@ -647,7 +647,52 @@ chrome.runtime.onInstalled.addListener(backgroundStart);
 
 chrome.runtime.onConnect.addListener( (port) => {
     //ProcessMessage(port);
-    port.onMessage.addListener(async (message) => {
+    if (port.name === "popup")
+        port.onMessage.addListener(async (message) => {
+            if (openDB){
+                if (message.clearRequest){
+                    const db = openDB.result;
+                    const tx = db.transaction([newTsName,"minute","hour","day","settings"],"readwrite");
+                    console.log("receive updated preference list: ",message);
+                    for (const target of message.clearRequest){
+                        console.log(target);
+                        if (target === "session"){
+            
+                        }
+                        else if (target === "continuous"){
+                            tx.objectStore(newTsName).clear();
+                        }
+                        else{
+                            tx.objectStore(target).clear();
+                        }
+                    }
+                    let s = tx.objectStore("settings");
+                    s.clear().onsuccess = (event) => {
+                        console.log("settings cleared, entering new...");
+                        s.put(message,0).onsuccess = (event) => {
+                            s.getAll().onsuccess = (event) => {
+                                console.log(event.target.result);
+                            }
+                        };
+                    }
+                }else if (message.preferenceRequest){
+
+                    const db = openDB.result;
+                    const tx = db.transaction("settings","readonly");
+                    const store = tx.objectStore("settings");
+                    console.log("got store: ", store);
+
+                    store.get(0).onsuccess = (event) => {
+                        //eventually: 
+
+                        console.log("sending back response: ", event.target.result);
+                        port.postMessage({reply: event.target.result});
+                    }
+        
+                }
+            }
+        });
+    else port.onMessage.addListener(async (message) => {
         if (message.choice === undefined){
             ProcessMessage(message);
         }
@@ -657,37 +702,7 @@ chrome.runtime.onConnect.addListener( (port) => {
     });
 });
 
-chrome.runtime.onMessage.addListener((message) => {
-    if (openDB){
-        if (message.clearRequest){
-            const db = openDB.result;
-            const tx = db.transaction([newTsName,"minute","hour","day","settings"],"readwrite");
-    
-            for (const target of message.clearRequest){
-                if (target === "session"){
-    
-                }
-                else if (target === "continuous"){
-                    tx.objectStore(newTsName).clear();
-                }
-                else{
-                    tx.objectStore(target).clear();
-                }
-            }
-            let s = tx.objectStore("settings");
-            s.clear.onsuccess = (event) => {
-                s.add(message);
-            }
-    /*  */
-            /* tx.objectStore(newTsName).clear();
-            tx.objectStore("minute").clear();
-            tx.objectStore("hour").clear();
-            tx.objectStore("day").clear(); */
-        }else {
-    
-        }
-    }
-})
+
 
 //each tab switch updates the "session" db
 //session db marks current website visited, and all segments of time of which the site was visited in unix
