@@ -186,6 +186,7 @@ async function MakePort(){
         updateLoop();
         if(selectRequireInit){
             SelectTimeLoop();
+            selectRequireInit = false;
         }
         aggregateRecord = true;
         
@@ -463,11 +464,11 @@ async function MakePort(){
         //verify choice against select
 
         const choice = message.choice;
+        console.log("receive");
         //console.log("hi");
         //console.log(choice);
         if (choice.time != selectChoice.time){
             console.log("difference");
-            
         }
 
         //const total = message.total;
