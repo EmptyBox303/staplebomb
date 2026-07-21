@@ -7,9 +7,14 @@ var clearDay = document.getElementById("day");
 var displayMessage = document.getElementById("display");
 
 resetButton.onclick = () =>{
+
+
+    //each time button is clicked, send new clear preferences to background
+    let newClearList = [];
     const extractName = (e) => {
         if (e.checked){
             displayMessage.innerHTML += `${e.id}<br>`;
+            newClearList.push(e.id);
         }
         
     }
@@ -18,18 +23,18 @@ resetButton.onclick = () =>{
     extractName(clearMinute);
     extractName(clearHour);
     extractName(clearDay);
-    
-    //console.warn("this is happening");
-    /* chrome.storage.local.clear(() => {
-        if (chrome.runtime.lastError){
-            console.warn("Storage clear error:", chrome.runtime.lastError);
-        }
-        else{
-            console.log("clear success");
-        }
-    }); */
 
-    /* chrome.runtime.sendMessage({
-        clearRequest: true
-    }); */
+    let newClearPrefrences = new Set(newClearList);
+    chrome.runtime.sendMessage({
+        clearRequest: newClearPrefrences
+    });
+
+    if (clearSession.checked){
+        //clear local storage data data
+    }
+    
 };
+
+chrome.runtime.onMessage.addListener((message) => {
+
+});
