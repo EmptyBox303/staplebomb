@@ -660,11 +660,30 @@ chrome.runtime.onConnect.addListener( (port) => {
 chrome.runtime.onMessage.addListener((message) => {
     if (message.clearRequest && openDB){
         const db = openDB.result;
-        const tx = db.transaction([newTsName,"minute","hour","day"],"readwrite");
-        tx.objectStore(newTsName).clear();
+        const tx = db.transaction([newTsName,"minute","hour","day","settings"],"readwrite");
+
+        for (const target of message.clearRequest){
+            if (target === "session"){
+
+            }
+            else if (target === "continuous"){
+                tx.objectStore(newTsName).clear();
+            }
+            else{
+                tx.objectStore(target).clear();
+            }
+        }
+        let s = tx.objectStore("settings");
+        s.clear.onsuccess = (event) => {
+            s.add(message);
+        }
+/*  */
+        /* tx.objectStore(newTsName).clear();
         tx.objectStore("minute").clear();
         tx.objectStore("hour").clear();
-        tx.objectStore("day").clear();
+        tx.objectStore("day").clear(); */
+    }else {
+        
     }
 })
 

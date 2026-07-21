@@ -30,7 +30,7 @@ resetButton.onclick = () =>{
     });
 
     if (clearSession.checked){
-        //clear local storage data data
+        chrome.storage.local.clear();
     }
     
 };
