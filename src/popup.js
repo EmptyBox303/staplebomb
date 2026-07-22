@@ -22,7 +22,24 @@ function addSite(inputSite){
     domainMessage.innerText = "";
     domainMessage.style.color = "red";
     for(const domain of setOfSites){
-        websitesList.innerHTML += `${domain} <br>`;
+        const newTracker = document.createElement("div");
+        websitesList.appendChild(newTracker);
+        newTracker.innerHTML = `${domain}`;
+        newTracker.style.width = "180px";
+        newTracker.style.position = "relative";
+        const trackerDelete = document.createElement("button");
+        trackerDelete.innerText = "-";
+        trackerDelete.style = `
+            position: absolute;
+            right: 0px;
+            height: 20px;
+            vertical-align: center;
+        `;
+        newTracker.appendChild(trackerDelete);
+        trackerDelete.onclick = () => {
+            websitesList.removeChild(newTracker);
+            setOfSites.delete(domain);
+        };
     }
     return true;
     
