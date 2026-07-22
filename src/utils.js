@@ -147,3 +147,21 @@ function UNIXtoDate(unixTime){
     let dateObj = new Date(unixTime);
     return dateObj.toLocaleString();
 }
+
+async function playSound(){
+    await chrome.offscreen.hasDocument(async (exists) => {
+        if(exists){
+            await chrome.offscreen.closeDocument();
+        }
+        await chrome.offscreen.createDocument({
+            url: 'audioPlayer.html',
+            reasons: ["AUDIO_PLAYBACK"],
+            justification: 'play alarm sfx',
+        });
+        
+        await new Promise((resolve) => setTimeout(resolve,1500));
+
+        chrome.offscreen.closeDocument();
+    });
+
+}

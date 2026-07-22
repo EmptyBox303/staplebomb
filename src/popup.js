@@ -18,7 +18,7 @@ async function playSound(){
     
 }
 
-playSound();
+//playSound();
 
 
 
@@ -135,14 +135,24 @@ resetButton.onclick = () =>{
         console.log(`message failed to send at popup: ${error}`);
     }
     if (clearSession.checked){
-        chrome.storage.local.clear(() => {
+        //get all keys from local storage
+        //for all storage not aggregate timer or recent
+        //remove
+        chrome.storage.local.get(null, (all) => {
+            for (const [key,contents] of Object.entries(all)){
+                if (key !== "recent" && key !== "aggregate" ){
+                    chrome.storage.local.remove([key]);
+                }
+            }
+        });
+        /* chrome.storage.local.clear(() => {
             if (chrome.runtime.lastError){
                 console.warn("Storage clear error:", chrome.runtime.lastError);
             }
             else{
                 console.log("clear success");
             }
-        });
+        }); */
     }
 
         
