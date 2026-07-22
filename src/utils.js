@@ -170,7 +170,7 @@ async function playSound(){
 
 }
 
-export const alarmEffects = {
+const alarmEffects = {
     RING: new alarmEffect("Ring alarm"),
     WARNING: new alarmEffect("Warning when timer is close"),
     DESTROY_TARGET: new alarmEffect("Close tabs targetted by timer"),

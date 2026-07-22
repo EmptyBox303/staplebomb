@@ -134,7 +134,7 @@ resetButton.onclick = () =>{
         //remove
         chrome.storage.local.get(null, (all) => {
             for (const [key,contents] of Object.entries(all)){
-                if (key !== "recent" && key !== "aggregate" ){
+                if (key !== "aggregate" ){
                     chrome.storage.local.remove([key]);
                 }
             }
@@ -200,6 +200,7 @@ chrome.storage.local.get(["recent"],(items) => {
             scrolldiv.append(thisspan);
             thisspan.innerHTML = `${domain}<br>`;
             thisspan.style.margin = "5px";
+            thisspan.style.whiteSpace = "nowrap";
             thisspan.onclick = () => {
                 addSite(domain);
             }

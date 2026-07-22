@@ -77,7 +77,23 @@
                 <input id = "secondEntry" type = "number" style = "width: 30px" min = "00" value = "00" max = "59">
             </div>
     
-            <div style = "position: absolute; right: 0px; top: 0px">hi boys</div>
+            <form id = "alarmEffect" style = "position: absolute; right: 0px; top: 0px; width: 200px">
+                Choose alarm effects:<br>
+                <input type = "radio" id = "RING">
+                <label for = "RING">Ring alarm</label><br>
+                
+                <input type = "radio" id = "WARN">
+                <label for = "WARN">Warn when approaching limit</label><br><br>
+                Destroy:<br>
+                <input type = "checkbox" id = "TARGET">
+                <label for = "TARGET">All tabs with targetted domains</label><br>
+                
+                <input type = "checkbox" id = "ALL">
+                <label for = "TARGET">All open tabs</label>
+                <br><br>
+
+                <button id = "initTimer">Start Timer</button>
+            </form>
         </div>
 
     </div>
