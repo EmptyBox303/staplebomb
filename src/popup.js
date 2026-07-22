@@ -7,6 +7,7 @@ const websitesList = document.getElementById("websitesList");
 const websitesEnter = document.getElementById("enterDomain");
 const setOfSites = new Set([]);
 const domainMessage = document.getElementById("domainMessage");
+const hidelist = document.getElementById("hidelist");
 
 function addSite(inputSite){
     if (inputSite === ""){
@@ -18,6 +19,7 @@ function addSite(inputSite){
         return false;
     }
     setOfSites.add(inputSite);
+    hidelist.style.display = "none";
     websitesList.innerHTML = "";
     domainMessage.innerText = "";
     domainMessage.style.color = "red";
@@ -31,14 +33,20 @@ function addSite(inputSite){
         trackerDelete.innerText = "-";
         trackerDelete.style = `
             position: absolute;
-            right: 0px;
+            right: 15px;
             height: 20px;
             vertical-align: center;
         `;
         newTracker.appendChild(trackerDelete);
+        
         trackerDelete.onclick = () => {
-            websitesList.removeChild(newTracker);
             setOfSites.delete(domain);
+            if (setOfSites.size === 0){
+                hidelist.style.display = "block";
+            }
+            console.log(setOfSites.size);
+            websitesList.removeChild(newTracker);
+            
         };
     }
     return true;

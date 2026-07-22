@@ -7,10 +7,12 @@ Current functionalities:
 
     
 
-- (WIP) Ability to dynamically track total time usage across different websites. Create custom tracking & timer in extension popup.
+- (In Progress) Ability to dynamically track total time usage across different websites. Create custom tracking & timer in extension popup.
 
-    - Subgoal(WIP): Popup should list previously or recently visited sites as selection choices. Alternatively, a texbox to enter an URL domain for tracking.
+    - Subgoal(Completed): Popup should list previously or recently visited sites as selection choices. Alternatively, a texbox to enter an URL domain for tracking.
 
     - Subgoal(Completed): Overhaul popup. The popup should add options for clearing different databases, including local, continuous, miunute, hour, and day as a checklist. DB reset targets only selected db's. Preferences saved in a "settings" objectstore in indexeddb. 
+
+    - Subgoal(In Progress): 
 
 - (WIP) Persistant timer-based alarms and tab destruction capabilities. Depending on popup choices, ring an alarm or destroy tabs upon usage timer reaching some point;

@@ -30,7 +30,6 @@
                 <label for="day">Day packets</label>
                 <br>
             </form>
-            
             <br>
             <button id = "resetButton">Reset</button>
             <br>
@@ -39,7 +38,7 @@
         </div>
         <div style = "position: absolute; right: 0px; top: 0px">
             Add websites/domains to timer: <br><br>
-            <div id = "scrollWebsites" style = "overflow-y: scroll; height: 70px; width: 150px;
+            <div id = "scrollWebsites" style = "overflow-y: auto; height: 70px; width: 150px;
             background-color: rgb(230,230,230);"></div>
             <br>
             Or enter your own:<br>
@@ -51,24 +50,36 @@
         
         <hr>
         <span id = "hiding">Loading...</span>
-        
-        <div style = "width: 180px; height: 150px; box-sizing:content-box; line-height: 1.6">
-            <span style = "padding-bottom: 5px;">Aggregate Timer <br></span>
-            <span id = "websitesList" style = "width: 180px"></span>
-            
-            <!--
-            what does the aggregate timer need?
-            1. recommendation of frequented websites
-            just show like the 6 most recently visited sites
-            each generates clickable thing
-            adds to timer list div
-            2. ability to enter domains and add to timer list div
-            3. ability to choose effect (alarm, close tabs, close browser)
-            4. ability to save this info as a timer preference
-            5. ability to start aggregate timer, which overwrites previous timer;
-            -->
-            
+        <div style = "position: relative">
+            <div style = "width: 180px; height: 180px; box-sizing:content-box; line-height: 1.6">
+                <span style = "padding-bottom: 5px;">Aggregate Timer <br></span>
+                
+                <div style = "max-width: 100vw; overflow-y: auto; overflow-x: hidden; height: 100px;">
+                    <small id = "hidelist" style = "color:grey">List of websites to track</small>
+                    <div id = "websitesList"></div>
+                </div>
+                
+                <!--
+                what does the aggregate timer need?
+                1. recommendation of frequented websites
+                just show like the 6 most recently visited sites
+                each generates clickable thing
+                adds to timer list div
+                2. ability to enter domains and add to timer list div
+                3. ability to choose effect (alarm, close tabs, close browser)
+                4. ability to save this info as a timer preference
+                5. ability to start aggregate timer, which overwrites previous timer;
+                -->
+                
+                Enter duration:<br>
+                <input id = "hour" type = "number" style = "width: 30px" min = "00" value = "00"> :
+                <input id = "minute" type = "number" style = "width: 30px" min = "00" value = "00" max = "59"> :
+                <input id = "second" type = "number" style = "width: 30px" min = "00" value = "00" max = "59">
+            </div>
+    
+            <div style = "position: absolute; right: 0px; top: 0px">hi boys</div>
         </div>
+
     </div>
 <script src = "src/popup.js"></script>
 </body>
