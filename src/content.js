@@ -61,7 +61,8 @@ async function MakePort(){
         new MonitorTime(365*1440, "year", PrecisionPolicies.DAY),
     ];
 
-    console.log("try again");
+    const alarmAlertSound = new Audio('vine-boom.mp3');
+
     const domain = ParseDomain(currentURL);
     var port;
     let port_success = false;

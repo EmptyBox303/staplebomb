@@ -1,5 +1,25 @@
 
 
+async function playSound(){
+    await chrome.offscreen.hasDocument(async (exists) => {
+        if(exists){
+            await chrome.offscreen.closeDocument();
+        }
+        await chrome.offscreen.createDocument({
+            url: 'audioPlayer.html',
+            reasons: ["AUDIO_PLAYBACK"],
+            justification: 'play alarm sfx',
+        });
+        
+        await new Promise((resolve) => setTimeout(resolve,1500));
+
+        chrome.offscreen.closeDocument();
+    });
+    
+}
+
+playSound();
+
 
 
 const resetButton = document.getElementById("resetButton");
@@ -12,6 +32,16 @@ const hidelist = document.getElementById("hidelist");
 const hourEntry = document.getElementById("hourEntry");
 const minuteEntry = document.getElementById("minuteEntry");
 const secondEntry = document.getElementById("secondEntry");
+
+
+/* chrome.offscreen.createDocument({
+    url: 'audioPlayer.html',
+    reasons: ["AUDIO_PLAYBACK", 'CLIPBOARD'],
+    justification: 'play alarm sfx',
+}); */
+
+console.log("attempt to create offscreen");
+//alarmAlertSound.play();
 
 function renderWebsiteList(){
     for(const domain of setOfSites){
