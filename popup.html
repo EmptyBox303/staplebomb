@@ -6,9 +6,9 @@
     <title>Popup</title>
 </head>
 <body>
-    <div style = "width: 200px; font-size: 10pt;
+    <div style = "position: relative; width: 400px; font-size: 10pt;
         font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
-        <div id = "showing" style = "display: none; ">
+        <div id = "showing" style = "display: none; width: 200px">
             <span>Select data/storage to be cleared:</span><br>
             <form>
                 <input type="checkbox" id="session">
@@ -34,15 +34,42 @@
             <br>
             <button id = "resetButton">Reset</button>
             <br>
+            <br>
             <span id = "display"></span>
-    
-            <script src = "src/popup.js"></script>
-    
         </div>
+        <div style = "position: absolute; right: 0px; top: 0px">
+            Add websites/domains to timer: <br><br>
+            <div id = "scrollWebsites" style = "overflow-y: scroll; height: 70px; width: 150px;
+            background-color: rgb(230,230,230);"></div>
+            <br>
+            Or enter your own:<br>
+            <input id = "enterDomain" type = "text" plaeholder = "enter domain">
+            <br>
+            <span id = "domainMessage" style = "color:red"></span>
+            <br>
+        </div>
+        
+        <hr>
         <span id = "hiding">Loading...</span>
-        <hr><br>
-
+        
+        <div style = "width: 180px; height: 150px; box-sizing:content-box; line-height: 1.6">
+            <span style = "padding-bottom: 5px;">Aggregate Timer <br></span>
+            <span id = "websitesList"></span>
+            
+            <!--
+            what does the aggregate timer need?
+            1. recommendation of frequented websites
+            just show like the 6 most recently visited sites
+            each generates clickable thing
+            adds to timer list div
+            2. ability to enter domains and add to timer list div
+            3. ability to choose effect (alarm, close tabs, close browser)
+            4. ability to save this info as a timer preference
+            5. ability to start aggregate timer, which overwrites previous timer;
+            -->
+            
+        </div>
     </div>
-    
+<script src = "src/popup.js"></script>
 </body>
 </html>

@@ -1,6 +1,32 @@
 
-var resetButton = document.getElementById("resetButton");
 
+
+
+const resetButton = document.getElementById("resetButton");
+const websitesList = document.getElementById("websitesList");
+const websitesEnter = document.getElementById("enterDomain");
+const setOfSites = new Set([]);
+const domainMessage = document.getElementById("domainMessage");
+
+function addSite(inputSite){
+    if (inputSite === ""){
+        domainMessage.innerText = "Please enter domain";
+        return false;
+    }
+    if (setOfSites.has(inputSite)){
+        domainMessage.innerText = "Site tracking exists";
+        return false;
+    }
+    setOfSites.add(inputSite);
+    websitesList.innerHTML = "";
+    domainMessage.innerText = "";
+    domainMessage.style.color = "red";
+    for(const domain of setOfSites){
+        websitesList.innerHTML += `${domain} <br>`;
+    }
+    return true;
+    
+}
 //request preferences info
 const port = chrome.runtime.connect({name:"popup"});
 try{
@@ -72,4 +98,45 @@ port.onMessage.addListener(async (response) => {
     }
     hideSpan.style.display = "none";
     showDiv.style.display = "inline-block";
+
+    const scrolldiv = document.getElementById("scrollWebsites");
+    chrome.storage.local.get(["recent"],(items) => {
+        if (chrome.runtime.lastError){
+            
+        }
+        console.log(items);
+        if (items.recent){
+            let recentList = Object.entries(items.recent);
+            recentList.sort((a,b) => (b[1]-a[1]));
+            for (const [domain,content] of recentList){
+                //scrolldiv.innerHTML += `${domain}<br>`;
+
+                let thisspan = document.createElement("span");
+                scrolldiv.append(thisspan);
+                thisspan.innerHTML = `${domain}<br>`;
+                thisspan.style.margin = "5px";
+                thisspan.onclick = () => {
+                    addSite(domain);
+                }
+                //for each entry, append a span
+                //each span has an onclick function
+                //onclick: add bs to websitesEnter
+            }
+        }
+        else{   
+            scrolldiv.innerHTML = "No recent visits";
+        }
+    });
+    /* for(let i = 0; i < 10; i++){
+        scrolldiv.innerHTML += "hello<br><br>";
+    } */
 });
+
+websitesEnter.addEventListener("keypress", (event) => {
+    if (event.key === "Enter"){
+        if (addSite(websitesEnter.value)){
+            websitesEnter.value = "";
+        }
+    }
+});
+
