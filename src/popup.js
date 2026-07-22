@@ -85,7 +85,7 @@ resetButton.onclick = () =>{
 
 port.onMessage.addListener(async (response) => {
     //hideSpan.innerText = "received";
-    await new Promise((resolve) => setTimeout(resolve,300));
+    await new Promise((resolve) => setTimeout(resolve,100));
     const hideSpan = document.getElementById("hiding");
     const showDiv = document.getElementById("showing");
     if (response.reply !== undefined && response.reply.clearRequest){
@@ -99,34 +99,8 @@ port.onMessage.addListener(async (response) => {
     hideSpan.style.display = "none";
     showDiv.style.display = "inline-block";
 
-    const scrolldiv = document.getElementById("scrollWebsites");
-    chrome.storage.local.get(["recent"],(items) => {
-        if (chrome.runtime.lastError){
-            
-        }
-        console.log(items);
-        if (items.recent){
-            let recentList = Object.entries(items.recent);
-            recentList.sort((a,b) => (b[1]-a[1]));
-            for (const [domain,content] of recentList){
-                //scrolldiv.innerHTML += `${domain}<br>`;
-
-                let thisspan = document.createElement("span");
-                scrolldiv.append(thisspan);
-                thisspan.innerHTML = `${domain}<br>`;
-                thisspan.style.margin = "5px";
-                thisspan.onclick = () => {
-                    addSite(domain);
-                }
-                //for each entry, append a span
-                //each span has an onclick function
-                //onclick: add bs to websitesEnter
-            }
-        }
-        else{   
-            scrolldiv.innerHTML = "No recent visits";
-        }
-    });
+    
+    
     /* for(let i = 0; i < 10; i++){
         scrolldiv.innerHTML += "hello<br><br>";
     } */
@@ -137,6 +111,34 @@ websitesEnter.addEventListener("keypress", (event) => {
         if (addSite(websitesEnter.value)){
             websitesEnter.value = "";
         }
+    }
+});
+const scrolldiv = document.getElementById("scrollWebsites");
+chrome.storage.local.get(["recent"],(items) => {
+    if (chrome.runtime.lastError){
+        
+    }
+    console.log(items);
+    if (items.recent){
+        let recentList = Object.entries(items.recent);
+        recentList.sort((a,b) => (b[1]-a[1]));
+        for (const [domain,content] of recentList){
+            //scrolldiv.innerHTML += `${domain}<br>`;
+
+            let thisspan = document.createElement("span");
+            scrolldiv.append(thisspan);
+            thisspan.innerHTML = `${domain}<br>`;
+            thisspan.style.margin = "5px";
+            thisspan.onclick = () => {
+                addSite(domain);
+            }
+            //for each entry, append a span
+            //each span has an onclick function
+            //onclick: add bs to websitesEnter
+        }
+    }
+    else{   
+        scrolldiv.innerHTML = "No recent visits";
     }
 });
 
