@@ -16,3 +16,4 @@ Current functionalities:
     - Subgoal(In Progress): 
 
 - (WIP) Persistant timer-based alarms and tab destruction capabilities. Depending on popup choices, ring an alarm or destroy tabs upon usage timer reaching some point;
+    - Vine boom sfx taken from: https://www.myinstants.com/en/instant/vine-boom-sound-70972/

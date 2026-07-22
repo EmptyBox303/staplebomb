@@ -13,21 +13,7 @@ const hourEntry = document.getElementById("hourEntry");
 const minuteEntry = document.getElementById("minuteEntry");
 const secondEntry = document.getElementById("secondEntry");
 
-
-function addSite(inputSite){
-    if (inputSite === ""){
-        domainMessage.innerText = "Please enter domain";
-        return false;
-    }
-    if (setOfSites.has(inputSite)){
-        domainMessage.innerText = "Site tracking exists";
-        return false;
-    }
-    setOfSites.add(inputSite);
-    hidelist.style.display = "none";
-    websitesList.innerHTML = "";
-    domainMessage.innerText = "";
-    domainMessage.style.color = "red";
+function renderWebsiteList(){
     for(const domain of setOfSites){
         const newTracker = document.createElement("div");
         websitesList.appendChild(newTracker);
@@ -54,6 +40,23 @@ function addSite(inputSite){
             
         };
     }
+}
+
+function addSite(inputSite){
+    if (inputSite === ""){
+        domainMessage.innerText = "Please enter domain";
+        return false;
+    }
+    if (setOfSites.has(inputSite)){
+        domainMessage.innerText = "Site tracking exists";
+        return false;
+    }
+    setOfSites.add(inputSite);
+    hidelist.style.display = "none";
+    websitesList.innerHTML = "";
+    domainMessage.innerText = "";
+    domainMessage.style.color = "red";
+    renderWebsiteList();
     return true;
     
 }
