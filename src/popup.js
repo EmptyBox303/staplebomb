@@ -9,6 +9,11 @@ const setOfSites = new Set([]);
 const domainMessage = document.getElementById("domainMessage");
 const hidelist = document.getElementById("hidelist");
 
+const hourEntry = document.getElementById("hourEntry");
+const minuteEntry = document.getElementById("minuteEntry");
+const secondEntry = document.getElementById("secondEntry");
+
+
 function addSite(inputSite){
     if (inputSite === ""){
         domainMessage.innerText = "Please enter domain";
@@ -62,7 +67,10 @@ catch(error){
     console.log(`message failed to send at popup: ${error}`);
 }
 
-console.log("test");
+atLeastTwoDigits(hourEntry);
+atLeastTwoDigits(minuteEntry);
+atLeastTwoDigits(secondEntry);
+
 
 resetButton.onclick = () =>{
     
@@ -167,3 +175,14 @@ chrome.storage.local.get(["recent"],(items) => {
     }
 });
 
+function atLeastTwoDigits(e){
+    console.log(e);
+    e.addEventListener('change', () => {
+        console.log("hi");
+        const inp = e.value;
+        if(inp.length < 2){
+            e.value = "0" + inp;
+        }
+    });
+    
+}
