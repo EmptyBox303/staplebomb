@@ -67,9 +67,9 @@ catch(error){
     console.log(`message failed to send at popup: ${error}`);
 }
 
-atLeastTwoDigits(hourEntry);
-atLeastTwoDigits(minuteEntry);
-atLeastTwoDigits(secondEntry);
+timeEntry(hourEntry,false);
+timeEntry(minuteEntry);
+timeEntry(secondEntry);
 
 
 resetButton.onclick = () =>{
@@ -175,13 +175,16 @@ chrome.storage.local.get(["recent"],(items) => {
     }
 });
 
-function atLeastTwoDigits(e){
+function timeEntry(e,limit = true){
     console.log(e);
     e.addEventListener('change', () => {
-        console.log("hi");
+        
         const inp = e.value;
         if(inp.length < 2){
             e.value = "0" + inp;
+        }
+        if (limit && Number(e.value) > 59){
+            e.value = "59";
         }
     });
     
