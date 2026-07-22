@@ -697,7 +697,10 @@ chrome.runtime.onConnect.addListener( (port) => {
             }
         });
     else port.onMessage.addListener(async (message) => {
-        if (message.choice === undefined){
+        if (message.awake === 'STAYAWAKE'){
+            console.log("I HAVE TO STAY AWAKE");
+        }
+        else if (message.choice === undefined){
             ProcessMessage(message);
         }
         else{

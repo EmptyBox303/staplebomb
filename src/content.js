@@ -122,7 +122,16 @@ async function MakePort(){
         /* AsyncLoop(() => {
             hidediv[0].innerText = `Since: ${(sessionStart !== undefined) ? UNIXtoDate(sessionStart) : ""}`;
         }, () => !stopwatchPause,1000); */
+        AsyncLoop(
+            () => {
+                send({awake:"STAYAWAKE"},port,currentURL);
+                //console.log("send plz");
+            },
+            () => !stopwatchPause,
+            5000
+        );
     }
+
     async function ShowTab(){
         
         //on showing the tab:

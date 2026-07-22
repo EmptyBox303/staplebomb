@@ -34,12 +34,6 @@ const minuteEntry = document.getElementById("minuteEntry");
 const secondEntry = document.getElementById("secondEntry");
 
 
-/* chrome.offscreen.createDocument({
-    url: 'audioPlayer.html',
-    reasons: ["AUDIO_PLAYBACK", 'CLIPBOARD'],
-    justification: 'play alarm sfx',
-}); */
-
 console.log("attempt to create offscreen");
 //alarmAlertSound.play();
 
@@ -189,6 +183,7 @@ websitesEnter.addEventListener("keypress", (event) => {
         }
     }
 });
+
 const scrolldiv = document.getElementById("scrollWebsites");
 chrome.storage.local.get(["recent"],(items) => {
     if (chrome.runtime.lastError){
@@ -232,3 +227,8 @@ function timeEntry(e,limit = true){
     });
     
 }
+
+
+//what info shoudl aggregate retain?
+//choice of effect: what should happen when the timer goes off
+//
