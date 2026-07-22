@@ -139,6 +139,10 @@ function Instr(unit,name){
     this.name = name;
 }
 
+function alarmEffect(name){
+    this.name = name;
+}
+
 //copied from GeekforGeeks
 function UNIXtoDate(unixTime){
 
@@ -164,4 +168,11 @@ async function playSound(){
         chrome.offscreen.closeDocument();
     });
 
+}
+
+export const alarmEffects = {
+    RING: new alarmEffect("Ring alarm"),
+    WARNING: new alarmEffect("Warning when timer is close"),
+    DESTROY_TARGET: new alarmEffect("Close tabs targetted by timer"),
+    DESTROY_WINDOW: new alarmEffect("Close all known tabs"),
 }

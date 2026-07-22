@@ -229,6 +229,8 @@ function timeEntry(e,limit = true){
 }
 
 
-//what info shoudl aggregate retain?
+//what info should aggregate retain?
 //choice of effect: what should happen when the timer goes off
-//
+//epoch: UNIXtime of start for this alarm
+//timeConstraint: if current time exceeds this, effect goes off
+//alarmEffect has a name

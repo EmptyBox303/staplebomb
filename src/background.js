@@ -2,6 +2,8 @@
 //whenever a tab gets focused on, get Date.now()
 //
 
+import {alarmEffects} from './utils.js';
+
 
 async function injectionCheck(tabId){
     try{
