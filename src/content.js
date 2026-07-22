@@ -142,6 +142,7 @@ async function MakePort(){
         //abort showtab if window is no longer focused;
 
         startTime = Date.now();
+        
         chrome.storage.local.get([domain], (result) =>{
             if (chrome.runtime.lastError){
                 aggregate = saveAggregate;
@@ -180,6 +181,23 @@ async function MakePort(){
                 }
             });
         }
+
+        chrome.storage.local.get(["recent"], (result) => {
+            let recentList = result.recent;
+            if (chrome.runtime.lastError){
+                return;
+            }
+            //result is a dictionary that associates a string with a name
+            if (recentList === undefined){
+                recentList = {};
+            }
+            recentList[domain] = startTime;
+            chrome.storage.local.set({recent: recentList}, () => {
+                if (chrome.runtime.lastError){
+                    return;
+                }
+            });
+        });
 
        // console.log("showing...");
         stopwatchPause = false;
